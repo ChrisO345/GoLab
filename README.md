@@ -6,8 +6,6 @@ ___
 
 ## Features
 
-- **Linear Regression**: TODO
-- **Binary Classification**: TODO
 
 ___
 

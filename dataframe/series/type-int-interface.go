@@ -1,4 +1,6 @@
-package dataframe
+package series
+
+import "math"
 
 type intElement struct {
 	e   int
@@ -20,6 +22,12 @@ func (i *intElement) Set(value interface{}) {
 		} else {
 			i.e = 0
 		}
+	case float64:
+		if math.IsNaN(v) || math.IsInf(v, 0) {
+			i.nan = true
+			return
+		}
+		i.e = int(v)
 	default:
 		i.nan = true
 		return
@@ -36,4 +44,8 @@ func (i intElement) IsNA() bool {
 
 func (i intElement) Type() Type {
 	return Int
+}
+
+func (i intElement) IsNumeric() bool {
+	return true
 }
