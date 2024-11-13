@@ -92,3 +92,64 @@ func TestDataFrame_Tail(t *testing.T) {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, result)
 	}
 }
+
+func TestDataFrame_SetIndex(t *testing.T) {
+	df := New(
+		series.New([]int{1, 2, 3}, series.Int, "Integers"),
+		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	)
+
+	df = df.SetIndex(series.New([]int{7, 8, 9}, series.Int, "Integers2"))
+
+	if df.Index().String() != "{Integers2 [7 8 9] int}" {
+		t.Errorf("Expected index to be [7, 8, 9], got %v", df.Index().String())
+	}
+}
+
+func TestDataFrame_ResetIndex(t *testing.T) {
+	df := New(
+		series.New([]int{1, 2, 3}, series.Int, "Integers"),
+		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	)
+
+	df = df.SetIndex(series.New([]int{7, 8, 9}, series.Int, "Integers2"))
+	df = df.ResetIndex()
+
+	if df.Index().String() != "{Index [0 1 2] int}" {
+		t.Errorf("Expected index to be [0, 1, 2], got %v", df.Index().String())
+	}
+}
+
+func TestDataFrame_Columns(t *testing.T) {
+	a := series.New([]int{1, 2, 3}, series.Int, "Integers")
+	b := series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats")
+
+	df := New(
+		a,
+		b,
+	)
+
+	cols := df.Columns()
+
+	if len(cols) != 2 {
+		t.Errorf("Expected 2 columns, got %v", len(cols))
+	}
+
+	if cols[0].String() != a.String() {
+		t.Errorf("Expected first column to be %v, got %v", a.String(), cols[0].String())
+	}
+	if cols[1].String() != b.String() {
+		t.Errorf("Expected second column to be %v, got %v", b.String(), cols[1].String())
+	}
+}
+
+func TestDataFrame_Index(t *testing.T) {
+	df := New(
+		series.New([]int{1, 2, 3}, series.Int, "Integers"),
+		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	)
+
+	if df.Index().String() != "{Index [0 1 2] int}" {
+		t.Errorf("Expected index to be nil, got %v", df.Index())
+	}
+}

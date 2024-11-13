@@ -3,10 +3,11 @@
 To Implement:
 
 - [ ] Dataframes
-    - [ ] Series
-    - [ ] Length
-    - [ ] Shape
-    - [ ] Columns
-    - [ ] Index
-    - [ ] Head
-    - [ ] Tail
+    - [x] Shape
+    - [x] Columns
+    - [x] Head
+    - [x] Tail
+    - [x] Index
+    - [x] SetIndex
+    - [x] ResetIndex
+    - [ ] ... (more to come)

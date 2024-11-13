@@ -47,15 +47,6 @@ func New(se ...series.Series) DataFrame {
 	return df
 }
 
-func SetIndex(df DataFrame, s series.Series) DataFrame {
-	if df.nrows != s.Len() {
-		panic(fmt.Errorf("index length %v does not match DataFrame length %v", s.Len(), df.nrows))
-	}
-
-	df.index = s.Copy()
-	return df
-}
-
 func checkColumnDimensions(se ...series.Series) (ncols int, nrows int, err error) {
 	ncols = len(se)
 	nrows = -1
@@ -73,10 +64,6 @@ func checkColumnDimensions(se ...series.Series) (ncols int, nrows int, err error
 		}
 	}
 	return
-}
-
-func (df DataFrame) Shape() (int, int) {
-	return df.nrows, df.ncols
 }
 
 func (df DataFrame) String() string {
@@ -122,6 +109,37 @@ func (df DataFrame) String() string {
 	}
 
 	return sb.String()
+}
+
+func (df DataFrame) Shape() (int, int) {
+	return df.nrows, df.ncols
+}
+
+func (df DataFrame) Columns() []series.Series {
+	return df.columns
+}
+
+func (df DataFrame) SetIndex(s series.Series) DataFrame {
+	if df.nrows != s.Len() {
+		panic(fmt.Errorf("index length %v does not match DataFrame length %v", s.Len(), df.nrows))
+	}
+
+	df.index = s.Copy()
+	return df
+}
+
+func (df DataFrame) ResetIndex() DataFrame {
+	indices := make([]int, df.nrows)
+	for i := 0; i < df.nrows; i++ {
+		indices[i] = i
+	}
+
+	df.index = series.New(indices, series.Int, "Index")
+	return df
+}
+
+func (df DataFrame) Index() series.Series {
+	return df.index
 }
 
 func (df DataFrame) Head(n ...int) DataFrame {
