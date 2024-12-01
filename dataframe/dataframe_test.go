@@ -8,9 +8,9 @@ import (
 func TestDataFrame_New_Int(t *testing.T) {
 	expected := "   Integers1  Integers2\n0          1          4\n1          2          5\n2          3          6"
 
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers1"),
-		series.New([]int{4, 5, 6}, series.Int, "Integers2"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers1"),
+		series.NewSeries([]int{4, 5, 6}, series.Int, "Integers2"),
 	)
 
 	if df.String() != expected {
@@ -27,9 +27,9 @@ func TestDataFrame_New_Int(t *testing.T) {
 func TestDataFrame_New_Float(t *testing.T) {
 	expected := "   Floats1  Floats2\n0      1.1      4.4\n1      2.2      5.5\n2      3.3      6.6"
 
-	df := New(
-		series.New([]float64{1.1, 2.2, 3.3}, series.Float, "Floats1"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats2"),
+	df := NewDataFrame(
+		series.NewSeries([]float64{1.1, 2.2, 3.3}, series.Float, "Floats1"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats2"),
 	)
 
 	if df.String() != expected {
@@ -40,9 +40,9 @@ func TestDataFrame_New_Float(t *testing.T) {
 func TestDataFrame_New_Mixed(t *testing.T) {
 	expected := "   Integers  Floats\n0         1     4.4\n1         2     5.5\n2         3     6.6"
 
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
 	)
 
 	if df.String() != expected {
@@ -51,9 +51,9 @@ func TestDataFrame_New_Mixed(t *testing.T) {
 }
 
 func TestDataFrame_Shape(t *testing.T) {
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
 	)
 
 	rows, cols := df.Shape()
@@ -66,10 +66,10 @@ func TestDataFrame_Shape(t *testing.T) {
 func TestDataFrame_Head(t *testing.T) {
 	expected := "   Integers  Floats  Integers2\n0         1     4.4          7\n1         2     5.5          8"
 
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
-		series.New([]int{7, 8, 9}, series.Int, "Integers2"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+		series.NewSeries([]int{7, 8, 9}, series.Int, "Integers2"),
 	)
 	result := df.Head(2).String()
 
@@ -81,10 +81,10 @@ func TestDataFrame_Head(t *testing.T) {
 func TestDataFrame_Tail(t *testing.T) {
 	expected := "   Integers  Floats  Integers2\n1         2     5.5          8\n2         3     6.6          9"
 
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
-		series.New([]int{7, 8, 9}, series.Int, "Integers2"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+		series.NewSeries([]int{7, 8, 9}, series.Int, "Integers2"),
 	)
 	result := df.Tail(2).String()
 
@@ -94,12 +94,12 @@ func TestDataFrame_Tail(t *testing.T) {
 }
 
 func TestDataFrame_SetIndex(t *testing.T) {
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
 	)
 
-	df = df.SetIndex(series.New([]int{7, 8, 9}, series.Int, "Integers2"))
+	df = df.SetIndex(series.NewSeries([]int{7, 8, 9}, series.Int, "Integers2"))
 
 	if df.Index().String() != "{Integers2 [7 8 9] int}" {
 		t.Errorf("Expected index to be [7, 8, 9], got %v", df.Index().String())
@@ -107,12 +107,12 @@ func TestDataFrame_SetIndex(t *testing.T) {
 }
 
 func TestDataFrame_ResetIndex(t *testing.T) {
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
 	)
 
-	df = df.SetIndex(series.New([]int{7, 8, 9}, series.Int, "Integers2"))
+	df = df.SetIndex(series.NewSeries([]int{7, 8, 9}, series.Int, "Integers2"))
 	df = df.ResetIndex()
 
 	if df.Index().String() != "{Index [0 1 2] int}" {
@@ -121,10 +121,10 @@ func TestDataFrame_ResetIndex(t *testing.T) {
 }
 
 func TestDataFrame_Columns(t *testing.T) {
-	a := series.New([]int{1, 2, 3}, series.Int, "Integers")
-	b := series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats")
+	a := series.NewSeries([]int{1, 2, 3}, series.Int, "Integers")
+	b := series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats")
 
-	df := New(
+	df := NewDataFrame(
 		a,
 		b,
 	)
@@ -144,12 +144,63 @@ func TestDataFrame_Columns(t *testing.T) {
 }
 
 func TestDataFrame_Index(t *testing.T) {
-	df := New(
-		series.New([]int{1, 2, 3}, series.Int, "Integers"),
-		series.New([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
 	)
 
 	if df.Index().String() != "{Index [0 1 2] int}" {
 		t.Errorf("Expected index to be nil, got %v", df.Index())
+	}
+}
+
+func TestDataFrame_Sort(t *testing.T) {
+	expected := "   Integers  Floats\n1         1     6.6\n2         2     5.5\n0         3     4.4"
+
+	df := NewDataFrame(
+		series.NewSeries([]int{3, 1, 2}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 6.6, 5.5}, series.Float, "Floats"),
+	)
+	df.Sort("Integers")
+
+	if df.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())
+	}
+
+	expected = "   Integers  Floats\n0         3     4.4\n2         2     5.5\n1         1     6.6"
+
+	df.Sort("Floats")
+
+	if df.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())
+	}
+}
+
+func TestDataFrame_Order(t *testing.T) {
+	expected := "   Integers  Floats\n2         3     6.6\n1         2     5.5\n0         1     4.4"
+
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	)
+	df = df.Order(2, 1, 0)
+
+	if df.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())
+	}
+}
+
+func TestDataFrame_Append(t *testing.T) {
+	expected := "   Integers  Floats\n0         1     4.4\n1         2     5.5\n2         3     6.6"
+
+	df1 := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+	)
+	s := series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats")
+
+	df1.Append(s)
+
+	if df1.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df1.String())
 	}
 }

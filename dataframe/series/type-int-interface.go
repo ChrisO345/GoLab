@@ -2,6 +2,12 @@ package series
 
 import "math"
 
+// TODO: Replace with generics??
+// type Element[T any] struct {
+// 	e T
+// 	nan bool
+// }
+
 type intElement struct {
 	e   int
 	nan bool

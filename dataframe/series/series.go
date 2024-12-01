@@ -1,8 +1,10 @@
 package series
 
-// TODO: Move to a separate package??
+// TODO: Should methods be pointers to allow in-place modification and better memory handling??
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Series struct {
 	Name     string
@@ -56,9 +58,10 @@ const (
 	Float Type = "float"
 	//String  Type = "string"
 	//Boolean Type = "bool"
+	//Runic Type = "rune"
 )
 
-func New(v interface{}, t Type, name string) Series {
+func NewSeries(v interface{}, t Type, name string) Series {
 	s := Series{Name: name, t: t}
 
 	allocMemory := func(n int) {
@@ -184,4 +187,83 @@ func (s Series) Tail(n int) Series {
 		se.Elem(i).Set(s.Val(s.Len() - n + i))
 	}
 	return se
+}
+
+// Sort sorts the series in place via bubble sort TODO: replace with merge sort later
+func (s Series) Sort() {
+	n := s.Len()
+	for i := 0; i < n; i++ {
+		for j := 0; j < n-i-1; j++ {
+			switch s.t {  // TODO: expand for other types
+			case Int:
+				if s.Val(j).(int) > s.Val(j+1).(int) {
+					temp := s.Val(j)
+					s.Elem(j).Set(s.Val(j + 1))
+					s.Elem(j + 1).Set(temp)
+				}
+			case Float:
+				if s.Val(j).(float64) > s.Val(j+1).(float64) {
+					temp := s.Val(j)
+					s.Elem(j).Set(s.Val(j + 1))
+					s.Elem(j + 1).Set(temp)
+				}
+			}
+		}
+	}
+}
+
+// SortedIndex returns the index what would be a sorted series
+func (s Series) SortedIndex() []int {
+	n := s.Len()
+	index := make([]int, n)
+	for i := 0; i < n; i++ {
+		index[i] = i
+	}
+
+	// Bubble Sort TODO: replace with more efficient sort such as merge sort
+	for i := 0; i < n; i++ {
+		for j := 0; j < n-i-1; j++ {
+			swap := false
+			switch s.t { // TODO: expand for more types
+			case Int:
+				if s.Val(index[j]).(int) > s.Val(index[j+1]).(int) {
+					swap = true
+				}
+			case Float:
+				if s.Val(index[j]).(float64) > s.Val(index[j+1]).(float64) {
+					swap = true
+				}
+			}
+			if swap {
+				index[j], index[j+1] = index[j+1], index[j]
+			}
+		}
+	}
+
+	return index
+}
+
+func (s Series) Order(positions ...int) Series {
+	if len(positions) != s.Len() {
+		panic("series and new positions must be the same length")
+	}
+
+	se := s.Copy()
+	for oldPos, newPos := range positions {
+		se.Elem(newPos).Set(s.Val(oldPos))
+	}
+
+	return se
+}
+
+func (s Series) Type() Type {
+	return s.t
+}
+
+func (s Series) IsNumeric() bool {
+	return s.t == Int || s.t == Float // FIXME: when implementing other types
+}
+
+func (s Series) IsObject() bool {
+	return false // FIXME: when implementing other types
 }

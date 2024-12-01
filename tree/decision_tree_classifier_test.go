@@ -1,6 +1,8 @@
 package tree
 
 import (
+	"GoLab/dataframe"
+	"GoLab/dataframe/series"
 	"fmt"
 	"testing"
 )
@@ -66,7 +68,12 @@ func TestDecisionTreeClassifier_Fit(t *testing.T) {
 		}
 	}()
 
-	dtc.Fit()
+	dfX := dataframe.NewDataFrame(
+		series.NewSeries([]int{1, 3, 2}, series.Int, "Feature1"),
+		series.NewSeries([]int{9, 8, 7}, series.Int, "Feature2"),
+	)
+	dfY := series.NewSeries([]int{1, 0, 1}, series.Int, "Target")
+	dtc.Fit(dfX, dfY)
 }
 
 func TestDecisionTreeClassifier_Predict(t *testing.T) {
