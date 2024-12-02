@@ -63,6 +63,20 @@ func TestDataFrame_Shape(t *testing.T) {
 	}
 }
 
+func TestDataFrame_Slice(t *testing.T) {
+	expected := "   Integers  Floats\n1         2     5.5\n2         3     6.6"
+
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3, 4}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6, 7.7}, series.Float, "Floats"),
+	)
+	result := df.Slice(1, 3).String()
+
+	if result != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, result)
+	}
+}
+
 func TestDataFrame_Head(t *testing.T) {
 	expected := "   Integers  Floats  Integers2\n0         1     4.4          7\n1         2     5.5          8"
 
@@ -184,6 +198,21 @@ func TestDataFrame_Order(t *testing.T) {
 		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
 	)
 	df = df.Order(2, 1, 0)
+
+	if df.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())
+	}
+
+	expected = "   Integers  Floats\n0         1     4.4\n1         2     5.5\n2         3     6.6"
+
+	df = df.Order(2, 1, 0)
+
+	if df.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())
+	}
+
+	expected = "   Integers  Floats\n2         3     6.6\n0         1     4.4\n1         2     5.5"
+	df = df.Order(2, 0, 1)
 
 	if df.String() != expected {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())

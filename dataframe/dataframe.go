@@ -70,6 +70,12 @@ func (df DataFrame) String() string {
 	var sb strings.Builder
 
 	maxIndexOffset := len(fmt.Sprint(df.index.Val(df.nrows - 1)))
+	for i := 0; i < df.index.Len(); i++ {
+		temp := len(fmt.Sprint(df.index.Val(i)))
+		if temp > maxIndexOffset {
+			maxIndexOffset = temp
+		}
+	}
 
 	for i, s := range df.columns {
 		if i == 0 {
@@ -156,6 +162,25 @@ func (df DataFrame) Index() series.Series {
 	return df.index
 }
 
+func (df DataFrame) Slice(from, to int) DataFrame{
+	if from < 0 || to > df.nrows {
+		panic(fmt.Errorf("to index %v out of range", to))
+	}
+
+	if from > to {
+		panic(fmt.Errorf("from index %v greater than to index %v", from, to))
+	}
+
+	var s []series.Series
+	for _, se := range df.columns {
+		s = append(s, se.Slice(from, to))
+	}
+
+	dfNew := NewDataFrame(s...)
+	dfNew.index = df.index.Slice(from, to)
+	return dfNew
+}
+
 func (df DataFrame) Head(n ...int) DataFrame {
 	if len(n) > 1 {
 		panic("only one argument allowed")
@@ -164,14 +189,7 @@ func (df DataFrame) Head(n ...int) DataFrame {
 		n = []int{5}
 	}
 
-	var s []series.Series
-	for _, se := range df.columns {
-		s = append(s, se.Head(n[0]))
-	}
-
-	dfNew := NewDataFrame(s...)
-	dfNew.index = df.index.Head(n[0])
-	return dfNew
+	return df.Slice(0, n[0])
 }
 
 func (df DataFrame) Tail(n ...int) DataFrame {
@@ -182,14 +200,9 @@ func (df DataFrame) Tail(n ...int) DataFrame {
 		n = []int{5}
 	}
 
-	var s []series.Series
-	for _, se := range df.columns {
-		s = append(s, se.Tail(n[0]))
-	}
+	fmt.Println(df.nrows, n[0])
 
-	dfNew := NewDataFrame(s...)
-	dfNew.index = df.index.Tail(n[0])
-	return dfNew
+	return df.Slice(df.nrows-n[0], df.nrows)
 }
 
 func (df DataFrame) At(i, j int) interface{} {
@@ -250,11 +263,20 @@ func (df DataFrame) Order(positions ...int) DataFrame{
 		panic("positions must be the same length as the DataFrame")
 	}
 
-	for oldPos, newPos := range positions {
-		if oldPos >= newPos {
+	for newPos, oldPos := range positions {
+		if oldPos == newPos {
 			continue
 		}
+
 		df.Swap(oldPos, newPos)
+
+		for i, pos := range positions {
+			if pos == newPos {
+				positions[i] = oldPos
+				positions[newPos] = newPos
+				break
+			}
+		}
 	}
 
 	return df

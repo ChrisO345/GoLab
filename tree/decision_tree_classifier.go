@@ -5,6 +5,7 @@ import (
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
 	"fmt"
+	"math"
 )
 
 type DecisionTree struct { // TODO: Move to another file. Should this be private?
@@ -83,21 +84,61 @@ func (dtc DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series
 		}
 	}
 
-	// Split along each feature, calculate the gini/entropy, and choose the best split
+	// Split along each feature, calculate the gini/entropy, and choose the best split TODO: FUNCTION
 	// Q_left  <= ...
 	// Q_right >  ...
-	//optimalSplit := math.Inf(1)
-	//bestAxis := -1
-	df := dfX.Copy()
-	df.Append(dfY)
-	for _, column := range dfX.Columns() {
+
+	optimalSplit := math.Inf(1)
+	bestAxis := -1
+	bestPosition := -1
+
+	for axis, column := range dfX.Columns() {
 		order := column.SortedIndex()
 
-		df = df.Order(order...)
-		fmt.Println(df)
+		dfX = dfX.Order(order...)
+		dfY = dfY.Order(order...)
+
+		for i := 0; i < numSamples - 1; i++ {
+			fmt.Println(i)
+			// Don't split if the values are the same
+			current := dfX.At(i, 0)
+			next := dfX.At(i+1, 0)
+			if current == next {
+				continue
+			}
+
+			dfLeftX := dfX.Slice(0, i)
+			dfLeftY := dfY.Slice(0, i)
+			dfRightX := dfX.Slice(i+1, numSamples)
+			dfRightY := dfY.Slice(i+1, numSamples)
+
+			// Calculate the split TODO: fix for more than 2 features
+			impurity := math.Inf(1)
+			if dtc.criterion == "gini" {
+				// Calculate the gini
+				// gini(dfX, dfY)
+			} else if dtc.criterion == "entropy" {
+				// Calculate the entropy
+				impurity = -entropy(dfLeftX, dfLeftY, dfRightX, dfRightY)
+			}
+			fmt.Println(impurity)
+
+			if impurity < optimalSplit {
+				optimalSplit = impurity
+				bestAxis = axis
+				bestPosition = i
+			}
+		}
 	}
+	order := dfX.Columns()[bestAxis].SortedIndex()
+	dfX = dfX.Order(order...)
+	dfY = dfY.Order(order...)
 
+	fmt.Println(bestAxis, bestPosition)
+	fmt.Println(dfX.At(bestPosition, 0), dfX.At(bestPosition, 1))
+	fmt.Println(optimalSplit)
 
+	fmt.Println(dfX.String())
 
 	panic("fit not implemented")
 }

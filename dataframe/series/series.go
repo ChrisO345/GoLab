@@ -151,8 +151,17 @@ func (s Series) HasNa() bool {
 	return false
 }
 
-func (s Series) Head(n int) Series {
+func (s Series) Slice(from, to int) Series {
+	if from < 0 || to > s.Len() {
+		panic("out of bounds")
+	}
+
+	if from > to {
+		panic("from must be less than to")
+	}
+
 	se := Series{Name: s.Name, t: s.t}
+	n := to - from
 
 	allocMemory := func(n int) {
 		switch s.t {
@@ -164,29 +173,18 @@ func (s Series) Head(n int) Series {
 	}
 	allocMemory(n)
 
-	for i := 0; i < n; i++ {
-		se.Elem(i).Set(s.Val(i))
+	for i := from; i < to; i++ {
+		se.Elem(i - from).Set(s.Val(i))
 	}
 	return se
 }
 
+func (s Series) Head(n int) Series {
+	return s.Slice(0, n)
+}
+
 func (s Series) Tail(n int) Series {
-	se := Series{Name: s.Name, t: s.t}
-
-	allocMemory := func(n int) {
-		switch s.t {
-		case Int:
-			se.elements = make(intElements, n)
-		case Float:
-			se.elements = make(floatElements, n)
-		}
-	}
-	allocMemory(n)
-
-	for i := 0; i < n; i++ {
-		se.Elem(i).Set(s.Val(s.Len() - n + i))
-	}
-	return se
+	return s.Slice(s.Len()-n, s.Len())
 }
 
 // Sort sorts the series in place via bubble sort TODO: replace with merge sort later
@@ -248,12 +246,25 @@ func (s Series) Order(positions ...int) Series {
 		panic("series and new positions must be the same length")
 	}
 
-	se := s.Copy()
-	for oldPos, newPos := range positions {
-		se.Elem(newPos).Set(s.Val(oldPos))
+	for newPos, oldPos := range positions {
+		if oldPos == newPos {
+			continue
+		}
+
+		temp := s.Val(oldPos)
+		s.Elem(oldPos).Set(s.Val(newPos))
+		s.Elem(newPos).Set(temp)
+
+		for i, pos := range positions {
+			if pos == newPos {
+				positions[i] = oldPos
+				positions[newPos] = newPos
+				break
+			}
+		}
 	}
 
-	return se
+	return s
 }
 
 func (s Series) Type() Type {
