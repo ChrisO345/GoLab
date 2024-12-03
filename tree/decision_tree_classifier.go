@@ -8,10 +8,6 @@ import (
 	"math"
 )
 
-type DecisionTree struct { // TODO: Move to another file. Should this be private?
-
-}
-
 type DecisionTreeClassifier struct {
 	criterion string
 	maxDepth  int
@@ -64,6 +60,103 @@ func (dtc *DecisionTreeClassifier) SetMaxDepth(maxDepth int) {
 // force implementation of Model interface
 var _ base.Model = (*DecisionTreeClassifier)(nil)
 
+func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.Series) *DecisionTree {
+	numSamples, _ := dfX.Shape()
+
+	if numSamples == 0 {
+		return nil
+	}
+
+	// If all samples are the same class, return a leaf node
+	if dfY.NUnique() {
+		fmt.Println("Leaf")
+		node := &DecisionTree{
+			Leaf: true,
+			Label: dfY.Val(0).(int),
+		}
+		fmt.Println(node)
+		return node
+	}
+
+	minimumEntropy := -1.0
+	bestSplitAxis := 0
+	bestSplitPosition := 0
+
+	// Dataset entropy
+	numOne := float64(dfY.Count(1))
+	numZero := float64(dfY.Count(0))
+	numTotal := numOne + numZero
+	entropyDF := -(numOne/numTotal)*math.Log2(numOne/numTotal) - (numZero/numTotal)*math.Log2(numZero/numTotal)
+	fmt.Println(fmt.Sprintf("Entropy: %v", entropyDF))
+
+	for axis, column := range dfX.Columns() {
+		fmt.Println(axis, column)
+		order := dfX.Columns()[axis].SortedIndex()
+		dfX = dfX.Order(order...)
+		dfY = dfY.Order(order...) // FIXME: This is not working correctly
+		fmt.Println(dfX.Columns()[0])
+		fmt.Println(dfX.Columns()[1])
+		fmt.Println(dfY)
+
+		for i := 0; i < numSamples; i++ {
+			dfYLeft := dfY.Slice(0, i)
+			dfYRight := dfY.Slice(i, numSamples)
+
+			var impurity float64
+			if dtc.criterion == "gini" {
+				panic("Gini Not Implemented")
+			} else if dtc.criterion == "entropy" {
+				impurity = entropyDF + entropy(dfYLeft, dfYRight)
+			}
+			fmt.Println(fmt.Sprintf("Split %v %v %v", dfX.At(i, 0), dfX.At(i, 1), impurity))
+			if impurity > minimumEntropy {
+				fmt.Println(fmt.Sprintf("Updated with %v, Dim: %v, Obs: %v", impurity, axis, i))
+				minimumEntropy = impurity
+				bestSplitAxis = axis
+				bestSplitPosition = i
+			}
+		}
+	}
+
+	// Sort by best axis
+	order := dfX.Columns()[bestSplitAxis].SortedIndex()
+	dfX = dfX.Order(order...)
+	dfY = dfY.Order(order...)
+
+	fmt.Println(fmt.Sprintf("Best split at axis %v, position %v with entropy %v", bestSplitAxis, bestSplitPosition, minimumEntropy))
+	fmt.Println(fmt.Sprintf("Value at split %v", dfX.Columns()[bestSplitAxis].Val(bestSplitPosition)))
+	fmt.Println(fmt.Sprintf("Value at split %v", dfX.At(bestSplitPosition, bestSplitAxis)))
+
+	fmt.Println(dfX.Columns()[bestSplitAxis])
+
+	// Split the data
+	dfXLeft := dfX.Slice(0, bestSplitPosition)
+	//dfYLeft := dfY.Slice(0, bestSplitPosition)
+	dfXRight := dfX.Slice(bestSplitPosition, numSamples)
+	//dfYRight := dfY.Slice(bestSplitPosition, numSamples)
+
+	fmt.Println("Split Data")
+	fmt.Println(dfXLeft.Columns()[bestSplitAxis])
+	fmt.Println(dfXRight.Columns()[bestSplitAxis])
+
+	// Recursively fit the Left and Right branches
+	//left := dtc.fitBranch(dfXLeft, dfYLeft)
+	//right := dtc.fitBranch(dfXRight, dfYRight)
+
+	node := &DecisionTree{
+		Leaf: false,
+		Axis: bestSplitAxis,
+		Position: bestSplitPosition,
+		Left: nil,
+		Right: nil,
+	}
+
+	fmt.Println("Node")
+	fmt.Println(node)
+
+	return nil
+}
+
 func (dtc DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	// TODO: Implement fit for gini and entropy
 
@@ -87,58 +180,9 @@ func (dtc DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series
 	// Split along each feature, calculate the gini/entropy, and choose the best split TODO: FUNCTION
 	// Q_left  <= ...
 	// Q_right >  ...
+	dtc.tree = dtc.fitBranch(dfX, dfY)
 
-	optimalSplit := math.Inf(1)
-	bestAxis := -1
-	bestPosition := -1
-
-	for axis, column := range dfX.Columns() {
-		order := column.SortedIndex()
-
-		dfX = dfX.Order(order...)
-		dfY = dfY.Order(order...)
-
-		for i := 0; i < numSamples - 1; i++ {
-			fmt.Println(i)
-			// Don't split if the values are the same
-			current := dfX.At(i, 0)
-			next := dfX.At(i+1, 0)
-			if current == next {
-				continue
-			}
-
-			dfLeftX := dfX.Slice(0, i)
-			dfLeftY := dfY.Slice(0, i)
-			dfRightX := dfX.Slice(i+1, numSamples)
-			dfRightY := dfY.Slice(i+1, numSamples)
-
-			// Calculate the split TODO: fix for more than 2 features
-			impurity := math.Inf(1)
-			if dtc.criterion == "gini" {
-				// Calculate the gini
-				// gini(dfX, dfY)
-			} else if dtc.criterion == "entropy" {
-				// Calculate the entropy
-				impurity = -entropy(dfLeftX, dfLeftY, dfRightX, dfRightY)
-			}
-			fmt.Println(impurity)
-
-			if impurity < optimalSplit {
-				optimalSplit = impurity
-				bestAxis = axis
-				bestPosition = i
-			}
-		}
-	}
-	order := dfX.Columns()[bestAxis].SortedIndex()
-	dfX = dfX.Order(order...)
-	dfY = dfY.Order(order...)
-
-	fmt.Println(bestAxis, bestPosition)
-	fmt.Println(dfX.At(bestPosition, 0), dfX.At(bestPosition, 1))
-	fmt.Println(optimalSplit)
-
-	fmt.Println(dfX.String())
+	//fmt.Println(dtc.tree.String())
 
 	panic("fit not implemented")
 }

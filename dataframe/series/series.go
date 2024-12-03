@@ -210,7 +210,7 @@ func (s Series) Sort() {
 	}
 }
 
-// SortedIndex returns the index what would be a sorted series
+// SortedIndex returns the index of what would be a sorted series
 func (s Series) SortedIndex() []int {
 	n := s.Len()
 	index := make([]int, n)
@@ -265,6 +265,41 @@ func (s Series) Order(positions ...int) Series {
 	}
 
 	return s
+}
+
+func (s Series) Count(v interface{}) int {
+	count := 0
+	for i := 0; i < s.Len(); i++ {
+		if s.Val(i) == v {
+			count++
+		}
+	}
+	return count
+}
+
+func (s Series) Unique() bool {
+	seen := make(map[interface{}]struct{})
+	for i := 0; i < s.Len(); i++ {
+		if _, ok := seen[s.Val(i)]; ok {
+			return false
+		}
+		seen[s.Val(i)] = struct{}{}
+	}
+	return true
+}
+
+func (s Series) NUnique() bool {
+	if s.Len() == 0 {
+		panic("empty series...")
+	}
+
+	first := s.Val(0)
+	for i := 1; i < s.Len(); i++ {
+		if s.Val(i) != first {
+			return false
+		}
+	}
+	return true
 }
 
 func (s Series) Type() Type {
