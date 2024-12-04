@@ -6,7 +6,7 @@ import (
 	"math"
 )
 
-type criterionFunction func(dataframe.DataFrame) float64
+type criterionFunction func(dfLeftY series.Series, dfRightY series.Series) float64
 
 func gini(frame dataframe.DataFrame) float64 {
 	panic("gini not implemented")

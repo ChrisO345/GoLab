@@ -8,6 +8,7 @@ import (
 	"math"
 )
 
+// DecisionTreeClassifier is a struct that represents a decision tree classifier
 type DecisionTreeClassifier struct {
 	criterion string
 	maxDepth  int
@@ -18,17 +19,19 @@ type DecisionTreeClassifier struct {
 	tree *DecisionTree
 }
 
+// NewDecisionTreeClassifier creates a new DecisionTreeClassifier with default values
 func NewDecisionTreeClassifier() *DecisionTreeClassifier {
 	return &DecisionTreeClassifier{
 		criterion: "gini",
 		maxDepth:  -1,
-		tree: nil,
+		tree:      nil,
 	}
 }
 
+// SetCriterion sets the criterion for the DecisionTreeClassifier
 func (dtc *DecisionTreeClassifier) SetCriterion(criterion string) {
 	if dtc.tree != nil {
-		panic("cannot set criterion after fit")
+		panic(fmt.Errorf("cannot set criterion after fit"))
 	}
 
 	possibleCriteria := []string{"gini", "entropy"}
@@ -39,20 +42,22 @@ func (dtc *DecisionTreeClassifier) SetCriterion(criterion string) {
 			return
 		}
 	}
-	panic(fmt.Sprintf("invalid criterion, must be one of %v", possibleCriteria))
+	panic(fmt.Errorf("criterion must be one of %v, but got %v", possibleCriteria, criterion))
 }
 
+// SetCriterionFromFunction sets the criterion for the DecisionTreeClassifier from a criterion function
 func (dtc DecisionTreeClassifier) SetCriterionFromFunction(criterion func()) {
 	panic("SetCriterionFromFunction not implemented")
 }
 
+// SetMaxDepth sets the maximum depth of the DecisionTreeClassifier
 func (dtc *DecisionTreeClassifier) SetMaxDepth(maxDepth int) {
 	if dtc.tree != nil {
-		panic("cannot set maxDepth after fit")
+		panic(fmt.Errorf("cannot set maxDepth after fit"))
 	}
 
 	if maxDepth < -1 || maxDepth == 0 { // Maybe maxDepth of 0 should be allowed? Unsure of the implications
-		panic("incorrect depth specified")
+		panic(fmt.Errorf("maxDepth must be greater than 0 or -1 for no limit, but got %v", maxDepth))
 	}
 	dtc.maxDepth = maxDepth
 }
@@ -60,7 +65,7 @@ func (dtc *DecisionTreeClassifier) SetMaxDepth(maxDepth int) {
 // force implementation of Model interface
 var _ base.Model = (*DecisionTreeClassifier)(nil)
 
-func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.Series) *DecisionTree {
+func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.Series, depth int) *DecisionTree {
 	numSamples, _ := dfX.Shape()
 
 	if numSamples == 0 {
@@ -68,9 +73,9 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 	}
 
 	// If all samples are the same class, return a leaf node
-	if dfY.NUnique() {
+	if dfY.Homogeneous() {
 		return &DecisionTree{
-			Leaf: true,
+			Leaf:  true,
 			Label: dfY.Val(0).(int),
 		}
 	}
@@ -115,18 +120,22 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 	dfYRight := dfY.Slice(bestSplitPosition, numSamples)
 
 	// Recursively fit the Left and Right branches
-	left := dtc.fitBranch(dfXLeft, dfYLeft)
-	right := dtc.fitBranch(dfXRight, dfYRight)
+	var left, right *DecisionTree
+	if dtc.maxDepth == -1 || depth < dtc.maxDepth {
+		left = dtc.fitBranch(dfXLeft, dfYLeft, depth+1)
+		right = dtc.fitBranch(dfXRight, dfYRight, depth+1)
+	}
 
 	return &DecisionTree{
-		Leaf: false,
-		Axis: bestSplitAxis,
+		Leaf:  false,
+		Axis:  bestSplitAxis,
 		Value: dfX.At(bestSplitPosition, bestSplitAxis).(float64),
-		Left: left,
+		Left:  left,
 		Right: right,
 	}
 }
 
+// Fit fits the DecisionTreeClassifier to the data and creates the DecisionTree
 func (dtc *DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	// TODO: Implement fit for gini and entropy
 
@@ -134,31 +143,33 @@ func (dtc *DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Serie
 	numOutputs := dfY.Len()
 
 	if numSamples != numOutputs {
-		panic("number of observations must be the same") // TODO: improve error message
+		panic(fmt.Errorf("number of samples %v and number of outputs %v must be equal", numSamples, numOutputs))
 	}
 
 	if numFeatures > 2 {
 		panic("fit not implemented for num_samples > 2") // TODO: implement...
 	}
 
-	for _, columns := range dfX.Columns() {
-		if !columns.IsNumeric() {
-			panic("data must be numeric") // TODO: improve error message
-		}
+	objects := dfX.SelectObjectNames()
+	if objects != nil {
+		panic(fmt.Errorf("cannot fit with object columns %v", dfX.SelectObjectNames()))
 	}
 
-	dtc.tree = dtc.fitBranch(dfX, dfY)
+	dtc.tree = dtc.fitBranch(dfX, dfY, 1)
 }
 
+// Predict predicts the target values of the given dataframe.DataFrame
 func (dtc DecisionTreeClassifier) Predict(df ...dataframe.DataFrame) series.Series {
 	// TODO: Implement predict on DecisionTreeClassifier
 	panic("predict not implemented")
 }
 
+// IsClassifier returns true if the DecisionTreeClassifier is a classifier
 func (dtc DecisionTreeClassifier) IsClassifier() bool {
 	return true
 }
 
+// IsRegressor returns true if the DecisionTreeClassifier is a regressor
 func (dtc DecisionTreeClassifier) IsRegressor() bool {
 	return false
 }

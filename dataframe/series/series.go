@@ -6,18 +6,22 @@ import (
 	"fmt"
 )
 
+// Series is a collection of elements of the same type and
+// is the basic building block of a DataFrame
 type Series struct {
 	Name     string
 	elements Elements
 	t        Type
 }
 
+// Elements is an interface that defines the methods that a collection of elements must implement
 type Elements interface {
 	Elem(int) Element
 	Len() int
 	Values() []interface{}
 }
 
+// Element is an interface that defines the methods that an element must implement
 type Element interface {
 	Set(interface{})
 	Get() interface{}
@@ -27,6 +31,7 @@ type Element interface {
 	Type() Type
 }
 
+// intElement is the implementation of the Element interface for int types
 type intElements []intElement
 
 func (i intElements) Len() int           { return len(i) }
@@ -39,6 +44,7 @@ func (i intElements) Values() []interface{} { // TODO: improve the way that this
 	return v
 }
 
+// floatElement is the implementation of the Element interface for float types
 type floatElements []floatElement
 
 func (f floatElements) Len() int           { return len(f) }
@@ -51,6 +57,7 @@ func (f floatElements) Values() []interface{} {
 	return v
 }
 
+// Type defines the type of the series
 type Type string
 
 const (
@@ -61,6 +68,7 @@ const (
 	//Runic Type = "rune"
 )
 
+// NewSeries creates a new series from a slice of values of type t, and a name
 func NewSeries(v interface{}, t Type, name string) Series {
 	s := Series{Name: name, t: t}
 
@@ -104,6 +112,7 @@ func NewSeries(v interface{}, t Type, name string) Series {
 	return s
 }
 
+// Copy returns a memory copy of the series
 func (s Series) Copy() Series {
 	name := s.Name
 	t := s.t
@@ -125,23 +134,27 @@ func (s Series) Copy() Series {
 	}
 }
 
+// Len returns the number of elements in the series
 func (s Series) Len() int {
 	return s.elements.Len()
 }
 
-// String implements the stringer interface for Series
+// String returns the Stringer implementation of the series
 func (s Series) String() string {
 	return fmt.Sprintf("{%v %v %v}", s.Name, s.elements.Values(), s.t)
 }
 
+// Val returns the value of the element at index i
 func (s Series) Val(i int) interface{} {
 	return s.elements.Elem(i).Get()
 }
 
+// Elem returns the element at index i
 func (s Series) Elem(i int) Element {
 	return s.elements.Elem(i)
 }
 
+// HasNa returns true if the series has any NA values
 func (s Series) HasNa() bool {
 	for i := 0; i < s.Len(); i++ {
 		if s.Elem(i).IsNA() {
@@ -151,17 +164,18 @@ func (s Series) HasNa() bool {
 	return false
 }
 
-func (s Series) Slice(from, to int) Series {
-	if from < 0 || to > s.Len() {
-		panic("out of bounds")
+// Slice returns a copy of the series from index a to index b
+func (s Series) Slice(a, b int) Series {
+	if a < 0 {
+		panic(fmt.Errorf("a index %v out of range", a))
 	}
 
-	if from > to {
-		panic("from must be less than to")
+	if b > s.Len() || a > b{
+		panic(fmt.Errorf("b index %v out of range", b))
 	}
 
 	se := Series{Name: s.Name, t: s.t}
-	n := to - from
+	n := b - a
 
 	allocMemory := func(n int) {
 		switch s.t {
@@ -173,16 +187,18 @@ func (s Series) Slice(from, to int) Series {
 	}
 	allocMemory(n)
 
-	for i := from; i < to; i++ {
-		se.Elem(i - from).Set(s.Val(i))
+	for i := a; i < b; i++ {
+		se.Elem(i - a).Set(s.Val(i))
 	}
 	return se
 }
 
+// Head returns a slice of the first n elements of the series
 func (s Series) Head(n int) Series {
 	return s.Slice(0, n)
 }
 
+// Tail returns a slice of the last n elements of the series
 func (s Series) Tail(n int) Series {
 	return s.Slice(s.Len()-n, s.Len())
 }
@@ -192,7 +208,7 @@ func (s Series) Sort() {
 	n := s.Len()
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i-1; j++ {
-			switch s.t {  // TODO: expand for other types
+			switch s.t { // TODO: expand for other types
 			case Int:
 				if s.Val(j).(int) > s.Val(j+1).(int) {
 					temp := s.Val(j)
@@ -210,7 +226,7 @@ func (s Series) Sort() {
 	}
 }
 
-// SortedIndex returns the index of what would be a sorted series
+// SortedIndex returns the indices of the series sorted in ascending order
 func (s Series) SortedIndex() []int {
 	n := s.Len()
 	index := make([]int, n)
@@ -241,9 +257,10 @@ func (s Series) SortedIndex() []int {
 	return index
 }
 
+// Order returns the series with the elements ordered according to the positions slice
 func (s Series) Order(positions ...int) Series {
 	if len(positions) != s.Len() {
-		panic("series and new positions must be the same length")
+		panic(fmt.Errorf("series and new positions must be the same length"))
 	}
 
 	// Need to copy otherwise positions collection will mutate
@@ -273,6 +290,7 @@ func (s Series) Order(positions ...int) Series {
 	return s
 }
 
+// Count returns the number of occurrences of the value v in the series
 func (s Series) Count(v interface{}) int {
 	count := 0
 	for i := 0; i < s.Len(); i++ {
@@ -283,6 +301,7 @@ func (s Series) Count(v interface{}) int {
 	return count
 }
 
+// Unique returns the true if there are no duplicates in the series
 func (s Series) Unique() bool {
 	seen := make(map[interface{}]struct{})
 	for i := 0; i < s.Len(); i++ {
@@ -294,9 +313,10 @@ func (s Series) Unique() bool {
 	return true
 }
 
-func (s Series) NUnique() bool {
+// Homogeneous returns true if there is only one value in the series
+func (s Series) Homogeneous() bool {
 	if s.Len() == 0 {
-		panic("empty series...")
+		panic(fmt.Errorf("cannot check homogeneity of an empty series"))
 	}
 
 	first := s.Val(0)
@@ -308,14 +328,26 @@ func (s Series) NUnique() bool {
 	return true
 }
 
+// NUnique returns the number of unique values in the series
+func (s Series) NUnique() int {
+	seen := make(map[interface{}]struct{})
+	for i := 0; i < s.Len(); i++ {
+		seen[s.Val(i)] = struct{}{}
+	}
+	return len(seen)
+}
+
+// Type returns the type of the series
 func (s Series) Type() Type {
 	return s.t
 }
 
+// IsNumeric returns true if the series is of a numeric type (int, float, bool)
 func (s Series) IsNumeric() bool {
 	return s.t == Int || s.t == Float // FIXME: when implementing other types
 }
 
+// IsObject returns true if the series is of a non-numeric type (string, rune, object)
 func (s Series) IsObject() bool {
 	return false // FIXME: when implementing other types
 }

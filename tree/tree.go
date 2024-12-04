@@ -6,7 +6,9 @@ import (
 	"strings"
 )
 
+// DecisionTree is a struct that represents a decision tree
 type DecisionTree struct {
+	// TODO: replace with []DecisionTree for n-output trees
 	Left  *DecisionTree
 	Right *DecisionTree
 
@@ -48,6 +50,7 @@ func (dt *DecisionTree) getStringer(depth int) (string, int, int) {
 	return s.String(), leftLeaf + rightLeaf, int(maxDepth)
 }
 
+// String is the Stringer implementation for DecisionTree
 func (dt *DecisionTree) String() string {
 	if dt == nil {
 		return "Empty Decision Tree"
