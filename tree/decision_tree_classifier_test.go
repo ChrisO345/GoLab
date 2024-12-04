@@ -4,6 +4,7 @@ import (
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -59,7 +60,7 @@ func TestDecisionTreeClassifier_SetMaxDepth(t *testing.T) {
 	dtc.SetMaxDepth(0)
 }
 
-func TestDecisionTreeClassifier_Fit(t *testing.T) {
+func TestDecisionTreeClassifier_FitGini(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf(fmt.Sprintf("%v", r))
@@ -67,7 +68,6 @@ func TestDecisionTreeClassifier_Fit(t *testing.T) {
 	}()
 
 	dtc := NewDecisionTreeClassifier()
-	dtc.SetCriterion("entropy")
 
 	dfX := dataframe.NewDataFrame(
 		series.NewSeries([]float64{0.9074, 0.9529, 0.5635, 0.9567, 0.8162, 0.3279, 0.0179, 0.4246, 0.4770, 0.3394, 0.0788, 0.4853, 0.4786, 0.2427, 0.4001, 0.8530, 0.5159, 0.6385, 0.5231, 0.5486}, series.Float, "Feature1"),
@@ -78,12 +78,16 @@ func TestDecisionTreeClassifier_Fit(t *testing.T) {
 	dtc.Fit(dfX, dfY)
 }
 
-func TestDecisionTreeClassifier_Fit2(t *testing.T) {
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		t.Errorf(fmt.Sprintf("%v", r))
-	//	}
-	//}()
+func TestDecisionTreeClassifier_FitEntropy(t *testing.T) {
+	var expected strings.Builder
+	expected.WriteString("Leafs: 4, Depth: 4\n")
+	expected.WriteString("Axis: 0, Value: 0.5978\n")
+	expected.WriteString("    Axis: 0, Value: 0.4356\n")
+	expected.WriteString("        Leaf: 1\n")
+	expected.WriteString("        Axis: 0, Value: 0.4487\n")
+	expected.WriteString("            Leaf: 0\n")
+	expected.WriteString("            Leaf: 1\n")
+	expected.WriteString("    Leaf: 0\n")
 
 	dtc := NewDecisionTreeClassifier()
 	dtc.SetCriterion("entropy")
@@ -94,6 +98,10 @@ func TestDecisionTreeClassifier_Fit2(t *testing.T) {
 	dfY := series.NewSeries([]int{1, 0, 1, 1, 0, 1, 0, 1}, series.Int, "Target")
 
 	dtc.Fit(dfX, dfY)
+
+	if dtc.tree.String() != expected.String() {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected.String(), dtc.tree.String())
+	}
 }
 
 func TestDecisionTreeClassifier_Predict(t *testing.T) {

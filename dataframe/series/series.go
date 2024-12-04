@@ -246,7 +246,13 @@ func (s Series) Order(positions ...int) Series {
 		panic("series and new positions must be the same length")
 	}
 
-	for newPos, oldPos := range positions {
+	// Need to copy otherwise positions collection will mutate
+	newPositions := make([]int, s.Len())
+	for i, pos := range positions {
+		newPositions[i] = pos
+	}
+
+	for newPos, oldPos := range newPositions {
 		if oldPos == newPos {
 			continue
 		}
@@ -255,10 +261,10 @@ func (s Series) Order(positions ...int) Series {
 		s.Elem(oldPos).Set(s.Val(newPos))
 		s.Elem(newPos).Set(temp)
 
-		for i, pos := range positions {
+		for i, pos := range newPositions {
 			if pos == newPos {
-				positions[i] = oldPos
-				positions[newPos] = newPos
+				newPositions[i] = oldPos
+				newPositions[newPos] = newPos
 				break
 			}
 		}

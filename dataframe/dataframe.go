@@ -258,22 +258,28 @@ func (df DataFrame) Sort(columns ...string) {
 	}
 }
 
-func (df DataFrame) Order(positions ...int) DataFrame{
+func (df DataFrame) Order(positions ...int) DataFrame {
 	if len(positions) != df.nrows {
 		panic("positions must be the same length as the DataFrame")
 	}
 
-	for newPos, oldPos := range positions {
+	// Need to copy otherwise positions collection will mutate
+	newPositions := make([]int, df.nrows)
+	for i, pos := range positions {
+		newPositions[i] = pos
+	}
+
+	for newPos, oldPos := range newPositions {
 		if oldPos == newPos {
 			continue
 		}
 
 		df.Swap(oldPos, newPos)
 
-		for i, pos := range positions {
+		for i, pos := range newPositions {
 			if pos == newPos {
-				positions[i] = oldPos
-				positions[newPos] = newPos
+				newPositions[i] = oldPos
+				newPositions[newPos] = newPos
 				break
 			}
 		}

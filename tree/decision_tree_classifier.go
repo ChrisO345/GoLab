@@ -69,34 +69,20 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 
 	// If all samples are the same class, return a leaf node
 	if dfY.NUnique() {
-		fmt.Println("Leaf")
-		node := &DecisionTree{
+		return &DecisionTree{
 			Leaf: true,
 			Label: dfY.Val(0).(int),
 		}
-		fmt.Println(node)
-		return node
 	}
 
-	minimumEntropy := -1.0
+	minimumEntropy := math.Inf(-1)
 	bestSplitAxis := 0
 	bestSplitPosition := 0
 
-	// Dataset entropy
-	numOne := float64(dfY.Count(1))
-	numZero := float64(dfY.Count(0))
-	numTotal := numOne + numZero
-	entropyDF := -(numOne/numTotal)*math.Log2(numOne/numTotal) - (numZero/numTotal)*math.Log2(numZero/numTotal)
-	fmt.Println(fmt.Sprintf("Entropy: %v", entropyDF))
-
 	for axis, column := range dfX.Columns() {
-		fmt.Println(axis, column)
-		order := dfX.Columns()[axis].SortedIndex()
+		order := column.SortedIndex()
 		dfX = dfX.Order(order...)
-		dfY = dfY.Order(order...) // FIXME: This is not working correctly
-		fmt.Println(dfX.Columns()[0])
-		fmt.Println(dfX.Columns()[1])
-		fmt.Println(dfY)
+		dfY = dfY.Order(order...)
 
 		for i := 0; i < numSamples; i++ {
 			dfYLeft := dfY.Slice(0, i)
@@ -106,11 +92,10 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 			if dtc.criterion == "gini" {
 				panic("Gini Not Implemented")
 			} else if dtc.criterion == "entropy" {
-				impurity = entropyDF + entropy(dfYLeft, dfYRight)
+				impurity = entropy(dfYLeft, dfYRight)
 			}
-			fmt.Println(fmt.Sprintf("Split %v %v %v", dfX.At(i, 0), dfX.At(i, 1), impurity))
+
 			if impurity > minimumEntropy {
-				fmt.Println(fmt.Sprintf("Updated with %v, Dim: %v, Obs: %v", impurity, axis, i))
 				minimumEntropy = impurity
 				bestSplitAxis = axis
 				bestSplitPosition = i
@@ -123,41 +108,26 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 	dfX = dfX.Order(order...)
 	dfY = dfY.Order(order...)
 
-	fmt.Println(fmt.Sprintf("Best split at axis %v, position %v with entropy %v", bestSplitAxis, bestSplitPosition, minimumEntropy))
-	fmt.Println(fmt.Sprintf("Value at split %v", dfX.Columns()[bestSplitAxis].Val(bestSplitPosition)))
-	fmt.Println(fmt.Sprintf("Value at split %v", dfX.At(bestSplitPosition, bestSplitAxis)))
-
-	fmt.Println(dfX.Columns()[bestSplitAxis])
-
 	// Split the data
 	dfXLeft := dfX.Slice(0, bestSplitPosition)
-	//dfYLeft := dfY.Slice(0, bestSplitPosition)
+	dfYLeft := dfY.Slice(0, bestSplitPosition)
 	dfXRight := dfX.Slice(bestSplitPosition, numSamples)
-	//dfYRight := dfY.Slice(bestSplitPosition, numSamples)
-
-	fmt.Println("Split Data")
-	fmt.Println(dfXLeft.Columns()[bestSplitAxis])
-	fmt.Println(dfXRight.Columns()[bestSplitAxis])
+	dfYRight := dfY.Slice(bestSplitPosition, numSamples)
 
 	// Recursively fit the Left and Right branches
-	//left := dtc.fitBranch(dfXLeft, dfYLeft)
-	//right := dtc.fitBranch(dfXRight, dfYRight)
+	left := dtc.fitBranch(dfXLeft, dfYLeft)
+	right := dtc.fitBranch(dfXRight, dfYRight)
 
-	node := &DecisionTree{
+	return &DecisionTree{
 		Leaf: false,
 		Axis: bestSplitAxis,
-		Position: bestSplitPosition,
-		Left: nil,
-		Right: nil,
+		Value: dfX.At(bestSplitPosition, bestSplitAxis).(float64),
+		Left: left,
+		Right: right,
 	}
-
-	fmt.Println("Node")
-	fmt.Println(node)
-
-	return nil
 }
 
-func (dtc DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
+func (dtc *DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	// TODO: Implement fit for gini and entropy
 
 	numSamples, numFeatures := dfX.Shape()
@@ -177,14 +147,7 @@ func (dtc DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series
 		}
 	}
 
-	// Split along each feature, calculate the gini/entropy, and choose the best split TODO: FUNCTION
-	// Q_left  <= ...
-	// Q_right >  ...
 	dtc.tree = dtc.fitBranch(dfX, dfY)
-
-	//fmt.Println(dtc.tree.String())
-
-	panic("fit not implemented")
 }
 
 func (dtc DecisionTreeClassifier) Predict(df ...dataframe.DataFrame) series.Series {
