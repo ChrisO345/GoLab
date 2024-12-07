@@ -337,6 +337,22 @@ func (s Series) NUnique() int {
 	return len(seen)
 }
 
+// Uniques returns a slice of the unique values in the series
+func (s Series) Uniques() []interface{} {
+	seen := make(map[interface{}]struct{})
+	for i := 0; i < s.Len(); i++ {
+		seen[s.Val(i)] = struct{}{}
+	}
+
+	uniques := make([]interface{}, len(seen))
+	i := 0
+	for k := range seen {
+		uniques[i] = k
+		i++
+	}
+	return uniques
+}
+
 // Type returns the type of the series
 func (s Series) Type() Type {
 	return s.t

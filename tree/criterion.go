@@ -1,39 +1,42 @@
 package tree
 
 import (
-	"GoLab/dataframe"
 	"GoLab/dataframe/series"
 	"math"
 )
 
 type criterionFunction func(dfLeftY series.Series, dfRightY series.Series) float64
 
-func gini(frame dataframe.DataFrame) float64 {
+func gini(dfLeftY series.Series, dfRightY series.Series) float64 {
 	panic("gini not implemented")
 }
 
 func entropy(dfLeftY series.Series, dfRightY series.Series) float64 {
-	leftCount := dfLeftY.Len()
-	rightCount := dfRightY.Len()
-
-	leftPositive := dfLeftY.Count(1)
-	leftNegative := dfLeftY.Count(0)
-
-	rightPositive := dfRightY.Count(1)
-	rightNegative := dfRightY.Count(0)
+	leftLength := float64(dfLeftY.Len())
+	rightLength := float64(dfRightY.Len())
+	totalLength := leftLength + rightLength
 
 	// Calculate entropy
-	leftEntropy := -((float64(leftPositive)/float64(leftCount))*math.Log2(float64(leftPositive)/float64(leftCount)) + (float64(leftNegative)/float64(leftCount))*math.Log2(float64(leftNegative)/float64(leftCount)))
-	if leftPositive == 0 || leftNegative == 0 {
-		leftEntropy = 0.0
+	uniqueLeft := dfLeftY.Uniques()
+	uniqueRight := dfRightY.Uniques()
+
+	leftEntropy := 0.0
+	if len(uniqueLeft) != 1 {
+		for _, u := range uniqueLeft {
+			countU := float64(dfLeftY.Count(u))
+			leftEntropy -= (countU/leftLength)*math.Log2(countU/leftLength)
+		}
 	}
 
-	rightEntropy := -((float64(rightPositive)/float64(rightCount))*math.Log2(float64(rightPositive)/float64(rightCount)) + (float64(rightNegative)/float64(rightCount))*math.Log2(float64(rightNegative)/float64(rightCount)))
-	if rightPositive == 0 || rightNegative == 0 {
-		rightEntropy = 0.0
+	rightEntropy := 0.0
+	if len(uniqueRight) != 1 {
+		for _, u := range uniqueRight {
+			countU := float64(dfRightY.Count(u))
+			rightEntropy -= (countU/rightLength)*math.Log2(countU/rightLength)
+		}
 	}
 
-	impurityDrop := - (float64(leftCount)/float64(leftCount+rightCount))*leftEntropy - (float64(rightCount)/float64(leftCount+rightCount))*rightEntropy
+	impurityDrop := (leftLength/totalLength)*leftEntropy + (rightLength/totalLength)*rightEntropy
 
 	return impurityDrop
 }

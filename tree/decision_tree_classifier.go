@@ -80,7 +80,7 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 		}
 	}
 
-	minimumEntropy := math.Inf(-1)
+	minimumEntropy := math.Inf(1)
 	bestSplitAxis := 0
 	bestSplitPosition := 0
 
@@ -95,12 +95,12 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 
 			var impurity float64
 			if dtc.criterion == "gini" {
-				panic("Gini Not Implemented")
+				impurity = gini(dfYLeft, dfYRight)
 			} else if dtc.criterion == "entropy" {
 				impurity = entropy(dfYLeft, dfYRight)
 			}
 
-			if impurity > minimumEntropy {
+			if impurity < minimumEntropy {
 				minimumEntropy = impurity
 				bestSplitAxis = axis
 				bestSplitPosition = i
@@ -164,12 +164,12 @@ func (dtc DecisionTreeClassifier) Predict(df ...dataframe.DataFrame) series.Seri
 	panic("predict not implemented")
 }
 
-// IsClassifier returns true if the DecisionTreeClassifier is a classifier
+// IsClassifier returns true as DecisionTreeClassifier is a classifier
 func (dtc DecisionTreeClassifier) IsClassifier() bool {
 	return true
 }
 
-// IsRegressor returns true if the DecisionTreeClassifier is a regressor
+// IsRegressor returns true as DecisionTreeClassifier is a not regressor
 func (dtc DecisionTreeClassifier) IsRegressor() bool {
 	return false
 }

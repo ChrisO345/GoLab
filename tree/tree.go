@@ -14,6 +14,8 @@ type DecisionTree struct {
 
 	Leaf bool
 	Axis int
+
+	// value will always be numeric type, therefore float64 cast should always be safe
 	Value float64
 	Label int
 }
