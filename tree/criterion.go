@@ -8,23 +8,58 @@ import (
 type criterionFunction func(dfLeftY series.Series, dfRightY series.Series) float64
 
 func gini(dfLeftY series.Series, dfRightY series.Series) float64 {
-	panic("gini not implemented")
+	// Mathematical formulation of Gini impurity:
+	// $1 - \sum_{k}p_{mk}^{2}$
+	leftLength := float64(dfLeftY.Len())
+	rightLength := float64(dfRightY.Len())
+	totalLength := leftLength + rightLength
+
+	// Calculate Gini impurity
+	uniqueLeft := dfLeftY.ValueCounts()
+	uniqueRight := dfRightY.ValueCounts()
+
+	leftGini := 0.0
+	if len(uniqueLeft) != 1 {
+		leftGini = 1.0
+		for _, u := range uniqueLeft {
+			countU := float64(dfLeftY.Count(u))
+			p := countU / leftLength
+			leftGini -= math.Pow(p, 2)
+		}
+	}
+
+	rightGini := 0.0
+	if len(uniqueRight) != 1 {
+		rightGini = 1.0
+		for _, u := range uniqueRight {
+			countU := float64(dfRightY.Count(u))
+			p := countU / rightLength
+			rightGini -= math.Pow(p, 2)
+		}
+	}
+
+	split := (leftLength/totalLength)*leftGini + (rightLength/totalLength)*rightGini
+
+	return split
 }
 
 func entropy(dfLeftY series.Series, dfRightY series.Series) float64 {
+	// Mathematical formulation of entropy:
+	// $-\sum_{k}p_{mk}\log_{2}(p_{mk})$
 	leftLength := float64(dfLeftY.Len())
 	rightLength := float64(dfRightY.Len())
 	totalLength := leftLength + rightLength
 
 	// Calculate entropy
-	uniqueLeft := dfLeftY.Uniques()
-	uniqueRight := dfRightY.Uniques()
+	uniqueLeft := dfLeftY.ValueCounts()
+	uniqueRight := dfRightY.ValueCounts()
 
 	leftEntropy := 0.0
 	if len(uniqueLeft) != 1 {
 		for _, u := range uniqueLeft {
 			countU := float64(dfLeftY.Count(u))
-			leftEntropy -= (countU/leftLength)*math.Log2(countU/leftLength)
+			p := countU / leftLength
+			leftEntropy -= p * math.Log2(p)
 		}
 	}
 
@@ -32,11 +67,12 @@ func entropy(dfLeftY series.Series, dfRightY series.Series) float64 {
 	if len(uniqueRight) != 1 {
 		for _, u := range uniqueRight {
 			countU := float64(dfRightY.Count(u))
-			rightEntropy -= (countU/rightLength)*math.Log2(countU/rightLength)
+			p := countU / rightLength
+			rightEntropy -= p * math.Log2(p)
 		}
 	}
 
-	impurityDrop := (leftLength/totalLength)*leftEntropy + (rightLength/totalLength)*rightEntropy
+	split := (leftLength/totalLength)*leftEntropy + (rightLength/totalLength)*rightEntropy
 
-	return impurityDrop
+	return split
 }

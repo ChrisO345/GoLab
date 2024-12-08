@@ -337,8 +337,8 @@ func (s Series) NUnique() int {
 	return len(seen)
 }
 
-// Uniques returns a slice of the unique values in the series
-func (s Series) Uniques() []interface{} {
+// ValueCounts returns a slice of the unique values in the series
+func (s Series) ValueCounts() []interface{} {
 	seen := make(map[interface{}]struct{})
 	for i := 0; i < s.Len(); i++ {
 		seen[s.Val(i)] = struct{}{}

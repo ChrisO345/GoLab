@@ -3,7 +3,6 @@ package tree
 import (
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -35,7 +34,7 @@ func TestDecisionTreeClassifier_SetCriterion(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
+			t.Errorf("Expected SetCriterion to panic, but it did not")
 		}
 	}()
 
@@ -53,7 +52,7 @@ func TestDecisionTreeClassifier_SetMaxDepth(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
+			t.Errorf("Expected SetMaxDepth to panic, but it did not")
 		}
 	}()
 
@@ -61,11 +60,19 @@ func TestDecisionTreeClassifier_SetMaxDepth(t *testing.T) {
 }
 
 func TestDecisionTreeClassifier_FitGini(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf(fmt.Sprintf("%v", r))
-		}
-	}()
+	var expected strings.Builder
+	expected.WriteString("Leafs: 6, Depth: 5\n")
+    expected.WriteString("Axis: 0, Value: 0.9074\n")
+    expected.WriteString("    Axis: 0, Value: 0.4786\n")
+    expected.WriteString("        Axis: 1, Value: 0.5709\n")
+    expected.WriteString("            Leaf: 0\n")
+    expected.WriteString("            Leaf: 1\n")
+    expected.WriteString("        Axis: 1, Value: 0.7734\n")
+    expected.WriteString("            Leaf: 1\n")
+    expected.WriteString("            Axis: 0, Value: 0.5635\n")
+    expected.WriteString("                Leaf: 1\n")
+    expected.WriteString("                Leaf: 0\n")
+    expected.WriteString("    Leaf: 0\n")
 
 	dtc := NewDecisionTreeClassifier()
 
@@ -76,6 +83,10 @@ func TestDecisionTreeClassifier_FitGini(t *testing.T) {
 	dfY := series.NewSeries([]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, series.Int, "Target")
 
 	dtc.Fit(dfX, dfY)
+
+	if dtc.tree.String() != expected.String() {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected.String(), dtc.tree.String())
+	}
 }
 
 func TestDecisionTreeClassifier_FitEntropy(t *testing.T) {
@@ -104,24 +115,7 @@ func TestDecisionTreeClassifier_FitEntropy(t *testing.T) {
 	}
 }
 
-func TestDecisionTreeClassifier_PredictGini(t *testing.T) {
-	dtc := NewDecisionTreeClassifier()
-
-	df := dataframe.NewDataFrame(
-		series.NewSeries([]float64{0.1245, 0.6589, 0.4487, 0.4578, 0.5978, 0.2534, 0.4356, 0.3215}, series.Float, "Feature1"),
-		series.NewSeries([]float64{0.2523, 0.8767, 0.1786, 0.5978, 0.9873, 0.5768, 0.3987, 0.1394}, series.Float, "Feature2"),
-	)
-
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf(fmt.Sprintf("%v", r))
-		}
-	}()
-
-	dtc.Predict(df)
-}
-
-func TestDecisionTreeClassifier_PredictEntropy(t *testing.T) {
+func TestDecisionTreeClassifier_Predict(t *testing.T) {
 	expected := "{Target [1 1 0 1 1 0 1 1] int}"
 
 	dtc := NewDecisionTreeClassifier()
