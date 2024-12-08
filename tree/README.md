@@ -10,7 +10,7 @@ variable by learning simple decision rules inferred from the data features.
 
 The following models are available within the `tree` package:
 
-- [x] [DecisionTreeClassifier](tree/decision_tree_classifier.go)
+- [x] [DecisionTreeClassifier](decision_tree_classifier.go)
 - [ ] DecisionTreeRegressor
 - [ ] ExtraTreeClassifier
 - [ ] ExtraTreeRegressor
