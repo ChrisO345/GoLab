@@ -21,9 +21,8 @@ func gini(dfLeftY series.Series, dfRightY series.Series) float64 {
 	leftGini := 0.0
 	if len(uniqueLeft) != 1 {
 		leftGini = 1.0
-		for _, u := range uniqueLeft {
-			countU := float64(dfLeftY.Count(u))
-			p := countU / leftLength
+		for _, c := range uniqueLeft {
+			p := float64(c) / leftLength
 			leftGini -= math.Pow(p, 2)
 		}
 	}
@@ -31,9 +30,8 @@ func gini(dfLeftY series.Series, dfRightY series.Series) float64 {
 	rightGini := 0.0
 	if len(uniqueRight) != 1 {
 		rightGini = 1.0
-		for _, u := range uniqueRight {
-			countU := float64(dfRightY.Count(u))
-			p := countU / rightLength
+		for _, c := range uniqueRight {
+			p := float64(c) / rightLength
 			rightGini -= math.Pow(p, 2)
 		}
 	}
@@ -56,18 +54,16 @@ func entropy(dfLeftY series.Series, dfRightY series.Series) float64 {
 
 	leftEntropy := 0.0
 	if len(uniqueLeft) != 1 {
-		for _, u := range uniqueLeft {
-			countU := float64(dfLeftY.Count(u))
-			p := countU / leftLength
+		for _, c := range uniqueLeft {
+			p := float64(c) / leftLength
 			leftEntropy -= p * math.Log2(p)
 		}
 	}
 
 	rightEntropy := 0.0
 	if len(uniqueRight) != 1 {
-		for _, u := range uniqueRight {
-			countU := float64(dfRightY.Count(u))
-			p := countU / rightLength
+		for _, c := range uniqueRight {
+			p := float64(c) / rightLength
 			rightEntropy -= p * math.Log2(p)
 		}
 	}

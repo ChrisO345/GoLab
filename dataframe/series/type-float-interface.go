@@ -1,5 +1,7 @@
 package series
 
+import "math"
+
 type floatElement struct {
 	e float64
 	nan bool
@@ -13,6 +15,10 @@ func (f *floatElement) Set(value interface{}) {
 
 	switch v := value.(type) {
 	case float64:
+		if math.IsNaN(v) || math.IsInf(v, 0) {
+			f.nan = true
+			return
+		}
 		f.e = v
 	case int:
 		f.e = float64(v)

@@ -28,7 +28,7 @@ func (lr LogisticRegression) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	panic("fit not implemented")
 }
 
-func (lr LogisticRegression) Predict(df ...dataframe.DataFrame) series.Series {
+func (lr LogisticRegression) Predict(df dataframe.DataFrame) series.Series {
 	// TODO: Implement predict for logistic regression
 	panic("predict not implemented")
 }

@@ -1,7 +1,5 @@
 package series
 
-// TODO: Should methods be pointers to allow in-place modification and better memory handling??
-
 import (
 	"fmt"
 )
@@ -57,15 +55,28 @@ func (f floatElements) Values() []interface{} {
 	return v
 }
 
+// booleanElements is the implementation of the Element interface for float types
+type booleanElements []booleanElement
+
+func (b booleanElements) Len() int           { return len(b) }
+func (b booleanElements) Elem(j int) Element { return &b[j] }
+func (b booleanElements) Values() []interface{} {
+	v := make([]interface{}, len(b))
+	for j, e := range b {
+		v[j] = e.e
+	}
+	return v
+}
+
 // Type defines the type of the series
 type Type string
 
 const (
-	Int   Type = "int"
-	Float Type = "float"
-	//String  Type = "string"
-	//Boolean Type = "bool"
-	//Runic Type = "rune"
+	Int     Type = "int"
+	Float   Type = "float"
+	Boolean Type = "bool"
+	String  Type = "string"
+	Runic Type = "rune"
 )
 
 // NewSeries creates a new series from a slice of values of type t, and a name
@@ -78,6 +89,12 @@ func NewSeries(v interface{}, t Type, name string) Series {
 			s.elements = make(intElements, n)
 		case Float:
 			s.elements = make(floatElements, n)
+		case Boolean:
+			s.elements = make(booleanElements, n)
+		case String:
+			panic("not implemented")
+		case Runic:
+			panic("not implemented")
 		}
 	}
 
@@ -103,6 +120,12 @@ func NewSeries(v interface{}, t Type, name string) Series {
 			s.elements.Elem(i).Set(e)
 		}
 	case []bool:
+		l := len(v_)
+		allocMemory(l)
+		for i, e := range v_ {
+			s.elements.Elem(i).Set(e)
+		}
+	case []rune:
 		panic("not implemented")
 
 	default:
@@ -125,6 +148,12 @@ func (s Series) Copy() Series {
 	case Float:
 		elements = make(floatElements, s.elements.Len())
 		copy(elements.(floatElements), s.elements.(floatElements))
+	case Boolean:
+
+	case String:
+		panic("not implemented")
+	case Runic:
+		panic("not implemented")
 	}
 
 	return Series{
@@ -170,7 +199,7 @@ func (s Series) Slice(a, b int) Series {
 		panic(fmt.Errorf("a index %v out of range", a))
 	}
 
-	if b > s.Len() || a > b{
+	if b > s.Len() || a > b {
 		panic(fmt.Errorf("b index %v out of range", b))
 	}
 
@@ -208,7 +237,7 @@ func (s Series) Sort() {
 	n := s.Len()
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i-1; j++ {
-			switch s.t { // TODO: expand for other types
+			switch s.t {
 			case Int:
 				if s.Val(j).(int) > s.Val(j+1).(int) {
 					temp := s.Val(j)
@@ -221,6 +250,12 @@ func (s Series) Sort() {
 					s.Elem(j).Set(s.Val(j + 1))
 					s.Elem(j + 1).Set(temp)
 				}
+			case Boolean:
+				panic("not implemented")
+			case String:
+				panic("not implemented")
+			case Runic:
+				panic("not implemented")
 			}
 		}
 	}
@@ -238,7 +273,7 @@ func (s Series) SortedIndex() []int {
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i-1; j++ {
 			swap := false
-			switch s.t { // TODO: expand for more types
+			switch s.t {
 			case Int:
 				if s.Val(index[j]).(int) > s.Val(index[j+1]).(int) {
 					swap = true
@@ -247,6 +282,12 @@ func (s Series) SortedIndex() []int {
 				if s.Val(index[j]).(float64) > s.Val(index[j+1]).(float64) {
 					swap = true
 				}
+			case Boolean:
+				panic("not implemented")
+			case String:
+				panic("not implemented")
+			case Runic:
+				panic("not implemented")
 			}
 			if swap {
 				index[j], index[j+1] = index[j+1], index[j]
@@ -338,19 +379,13 @@ func (s Series) NUnique() int {
 }
 
 // ValueCounts returns a slice of the unique values in the series
-func (s Series) ValueCounts() []interface{} {
-	seen := make(map[interface{}]struct{})
+func (s Series) ValueCounts() map[interface{}]int {
+	seen := make(map[interface{}]int)
 	for i := 0; i < s.Len(); i++ {
-		seen[s.Val(i)] = struct{}{}
+		seen[s.Val(i)] = seen[s.Val(i)] + 1
 	}
 
-	uniques := make([]interface{}, len(seen))
-	i := 0
-	for k := range seen {
-		uniques[i] = k
-		i++
-	}
-	return uniques
+	return seen
 }
 
 // Type returns the type of the series
@@ -360,10 +395,10 @@ func (s Series) Type() Type {
 
 // IsNumeric returns true if the series is of a numeric type (int, float, bool)
 func (s Series) IsNumeric() bool {
-	return s.t == Int || s.t == Float // FIXME: when implementing other types
+	return s.t == Int || s.t == Float || s.t == Boolean
 }
 
 // IsObject returns true if the series is of a non-numeric type (string, rune, object)
 func (s Series) IsObject() bool {
-	return false // FIXME: when implementing other types
+	return s.t == String || s.t == Runic
 }
