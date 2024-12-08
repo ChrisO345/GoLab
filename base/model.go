@@ -8,7 +8,7 @@ import (
 // Model defines the interface for the all machine learning models
 type Model interface {
 	Fit(dfX dataframe.DataFrame, dfY series.Series)
-	Predict(df ...dataframe.DataFrame) series.Series
+	Predict(df dataframe.DataFrame) series.Series
 	//Score() float64
 
 	IsClassifier() bool

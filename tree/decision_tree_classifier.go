@@ -156,12 +156,53 @@ func (dtc *DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Serie
 	}
 
 	dtc.tree = dtc.fitBranch(dfX, dfY, 1)
+	dtc.tree.features = dfX.Names()
+	dtc.tree.target = dfY.Name
+}
+
+func (dtc DecisionTreeClassifier) predict(df dataframe.DataFrame, idx int) int {
+	current := dtc.tree
+	for current.hasChildren() {
+		if df.At(idx, current.Axis).(float64) <= current.Value {
+			current = current.Left
+		} else {
+			current = current.Right
+		}
+	}
+
+	// If leaf return the label otherwise return the
+	if current.Leaf {
+		return current.Label
+	}
+
+	panic(fmt.Errorf("current node is not a leaf"))
 }
 
 // Predict predicts the target values of the given dataframe.DataFrame
-func (dtc DecisionTreeClassifier) Predict(df ...dataframe.DataFrame) series.Series {
-	// TODO: Implement predict on DecisionTreeClassifier
-	panic("predict not implemented")
+func (dtc DecisionTreeClassifier) Predict(df dataframe.DataFrame) series.Series {
+	if dtc.tree == nil {
+		panic(fmt.Errorf("must fit model before predicting"))
+	}
+
+	numSamples, numFeatures := df.Shape()
+
+	if numFeatures > 2 {
+		panic("predict not implemented for num_samples > 2") // TODO: implement...
+	}
+
+	for idx, name := range df.Names() {
+		if name != dtc.tree.features[idx] {
+			panic(fmt.Errorf("column %v does not match fit column %v", name, dtc.tree.features[idx]))
+		}
+	}
+
+	predictions := make([]int, numSamples)
+	for i := 0; i < numSamples; i++ {
+		// Slice the dataframe...
+		predictions[i] = dtc.predict(df, i)
+	}
+
+	return series.NewSeries(predictions, series.Int, dtc.tree.target)
 }
 
 // IsClassifier returns true as DecisionTreeClassifier is a classifier

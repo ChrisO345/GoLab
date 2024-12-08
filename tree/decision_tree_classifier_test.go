@@ -104,16 +104,45 @@ func TestDecisionTreeClassifier_FitEntropy(t *testing.T) {
 	}
 }
 
-func TestDecisionTreeClassifier_Predict(t *testing.T) {
+func TestDecisionTreeClassifier_PredictGini(t *testing.T) {
 	dtc := NewDecisionTreeClassifier()
+
+	df := dataframe.NewDataFrame(
+		series.NewSeries([]float64{0.1245, 0.6589, 0.4487, 0.4578, 0.5978, 0.2534, 0.4356, 0.3215}, series.Float, "Feature1"),
+		series.NewSeries([]float64{0.2523, 0.8767, 0.1786, 0.5978, 0.9873, 0.5768, 0.3987, 0.1394}, series.Float, "Feature2"),
+	)
 
 	defer func() {
 		if r := recover(); r != nil {
-			//t.Errorf(fmt.Sprintf("%v", r))
+			t.Errorf(fmt.Sprintf("%v", r))
 		}
 	}()
 
-	dtc.Predict()
+	dtc.Predict(df)
+}
+
+func TestDecisionTreeClassifier_PredictEntropy(t *testing.T) {
+	expected := "{Target [1 1 0 1 1 0 1 1] int}"
+
+	dtc := NewDecisionTreeClassifier()
+	dtc.SetCriterion("entropy")
+	dfX := dataframe.NewDataFrame(
+		series.NewSeries([]float64{0.1245, 0.6589, 0.4487, 0.4578, 0.5978, 0.2534, 0.4356, 0.3215}, series.Float, "Feature1"),
+		series.NewSeries([]float64{0.2523, 0.8767, 0.1786, 0.5978, 0.9873, 0.5768, 0.3987, 0.1394}, series.Float, "Feature2"),
+	)
+	dfY := series.NewSeries([]int{1, 0, 1, 1, 0, 1, 0, 1}, series.Int, "Target")
+
+	dfPredict := dataframe.NewDataFrame(
+		series.NewSeries([]float64{0.3276, 0.2345, 0.6789, 0.1234, 0.5678, 0.9876, 0.3456, 0.4567}, series.Float, "Feature1"),
+		series.NewSeries([]float64{0.47, 0.89, 0.12, 0.34, 0.56, 0.78, 0.23, 0.45}, series.Float, "Feature2"),
+	)
+
+	dtc.Fit(dfX, dfY)
+	predictions := dtc.Predict(dfPredict)
+
+	if predictions.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, predictions.String())
+	}
 }
 
 func TestDecisionTreeClassifier_IsClassifier(t *testing.T) {

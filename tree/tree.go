@@ -8,16 +8,24 @@ import (
 
 // DecisionTree is a struct that represents a decision tree
 type DecisionTree struct {
-	// TODO: replace with []DecisionTree for n-output trees
 	Left  *DecisionTree
 	Right *DecisionTree
 
 	Leaf bool
 	Axis int
 
-	// value will always be numeric type, therefore float64 cast should always be safe
+	// value should always be numeric type, therefore float64 cast should always be safe
 	Value float64
+
+	// requires integer encoding of labels prior to fitting
 	Label int
+
+	features []string
+	target  string
+}
+
+func (dt *DecisionTree) hasChildren() bool {
+	return dt.Left != nil && dt.Right != nil
 }
 
 func (dt *DecisionTree) getStringer(depth int) (string, int, int) {
