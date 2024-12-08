@@ -233,3 +233,22 @@ func TestDataFrame_Append(t *testing.T) {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df1.String())
 	}
 }
+
+func TestDataFrame_Drop(t *testing.T) {
+	expected := "   Floats\n0     4.4\n1     5.5\n2     6.6"
+	seriesExpected := "{Integers [1 2 3] int}"
+
+	df := NewDataFrame(
+		series.NewSeries([]int{1, 2, 3}, series.Int, "Integers"),
+		series.NewSeries([]float64{4.4, 5.5, 6.6}, series.Float, "Floats"),
+	)
+	s := df.Drop("Integers")
+
+	if df.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, df.String())
+	}
+
+	if s.String() != seriesExpected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", seriesExpected, s.String())
+	}
+}

@@ -356,3 +356,15 @@ func (df DataFrame) SelectNumericNames() []string {
 	return objects
 }
 
+// Drop removes the specified column from the DataFrame and returns it as a series.Series.
+func (df *DataFrame) Drop(name string) series.Series {
+	for i, s := range df.columns {
+		if s.Name == name {
+			df.columns = append(df.columns[:i], df.columns[i+1:]...)
+			df.ncols--
+			return s
+		}
+	}
+	panic(fmt.Errorf("column %v not found", name))
+}
+
