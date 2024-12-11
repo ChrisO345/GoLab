@@ -68,6 +68,19 @@ func (b booleanElements) Values() []interface{} {
 	return v
 }
 
+// stringElements is the implementation of the Element interface for string types
+type stringElements []stringElement
+
+func (s stringElements) Len() int           { return len(s) }
+func (s stringElements) Elem(j int) Element { return &s[j] }
+func (s stringElements) Values() []interface{} {
+	v := make([]interface{}, len(s))
+	for j, e := range s {
+		v[j] = e.e
+	}
+	return v
+}
+
 // Type defines the type of the series
 type Type string
 
@@ -76,7 +89,7 @@ const (
 	Float   Type = "float"
 	Boolean Type = "bool"
 	String  Type = "string"
-	Runic Type = "rune"
+	Runic   Type = "rune"
 )
 
 // NewSeries creates a new series from a slice of values of type t, and a name
@@ -92,7 +105,7 @@ func NewSeries(v interface{}, t Type, name string) Series {
 		case Boolean:
 			s.elements = make(booleanElements, n)
 		case String:
-			panic("not implemented")
+			s.elements = make(stringElements, n)
 		case Runic:
 			panic("not implemented")
 		}
@@ -106,7 +119,11 @@ func NewSeries(v interface{}, t Type, name string) Series {
 
 	switch v_ := v.(type) {
 	case []string:
-		panic("not implemented")
+		l := len(v_)
+		allocMemory(l)
+		for i, e := range v_ {
+			s.elements.Elem(i).Set(e)
+		}
 	case []int:
 		l := len(v_)
 		allocMemory(l)
@@ -149,9 +166,11 @@ func (s Series) Copy() Series {
 		elements = make(floatElements, s.elements.Len())
 		copy(elements.(floatElements), s.elements.(floatElements))
 	case Boolean:
-
+		elements = make(booleanElements, s.elements.Len())
+		copy(elements.(booleanElements), s.elements.(booleanElements))
 	case String:
-		panic("not implemented")
+		elements = make(stringElements, s.elements.Len())
+		copy(elements.(stringElements), s.elements.(stringElements))
 	case Runic:
 		panic("not implemented")
 	}
@@ -166,6 +185,22 @@ func (s Series) Copy() Series {
 // Len returns the number of elements in the series
 func (s Series) Len() int {
 	return s.elements.Len()
+}
+
+// Append appends a value to the series
+func (s *Series) Append(v interface{}) {
+	switch s.t {
+	case Int:
+		s.elements = append(s.elements.(intElements), intElement{e: v.(int)})
+	case Float:
+		s.elements = append(s.elements.(floatElements), floatElement{e: v.(float64)})
+	case Boolean:
+		s.elements = append(s.elements.(booleanElements), booleanElement{e: v.(bool)})
+	case String:
+		s.elements = append(s.elements.(stringElements), stringElement{e: v.(string)})
+	case Runic:
+		panic("not implemented")
+	}
 }
 
 // String returns the Stringer implementation of the series
@@ -212,6 +247,14 @@ func (s Series) Slice(a, b int) Series {
 			se.elements = make(intElements, n)
 		case Float:
 			se.elements = make(floatElements, n)
+		case Boolean:
+			se.elements = make(booleanElements, n)
+		case String:
+			se.elements = make(stringElements, n)
+		case Runic:
+			panic("not implemented")
+		default:
+			panic("unsupported type")
 		}
 	}
 	allocMemory(n)
@@ -237,25 +280,24 @@ func (s Series) Sort() {
 	n := s.Len()
 	for i := 0; i < n; i++ {
 		for j := 0; j < n-i-1; j++ {
+			swap := false
 			switch s.t {
 			case Int:
-				if s.Val(j).(int) > s.Val(j+1).(int) {
-					temp := s.Val(j)
-					s.Elem(j).Set(s.Val(j + 1))
-					s.Elem(j + 1).Set(temp)
-				}
+				swap = s.Val(j).(int) > s.Val(j+1).(int)
 			case Float:
-				if s.Val(j).(float64) > s.Val(j+1).(float64) {
-					temp := s.Val(j)
-					s.Elem(j).Set(s.Val(j + 1))
-					s.Elem(j + 1).Set(temp)
-				}
+				swap = s.Val(j).(float64) > s.Val(j+1).(float64)
 			case Boolean:
-				panic("not implemented")
+				swap = s.Val(j).(bool) && !s.Val(j+1).(bool)
 			case String:
 				panic("not implemented")
 			case Runic:
 				panic("not implemented")
+			}
+
+			if swap {
+				temp := s.Val(j)
+				s.Elem(j).Set(s.Val(j + 1))
+				s.Elem(j + 1).Set(temp)
 			}
 		}
 	}
@@ -275,15 +317,11 @@ func (s Series) SortedIndex() []int {
 			swap := false
 			switch s.t {
 			case Int:
-				if s.Val(index[j]).(int) > s.Val(index[j+1]).(int) {
-					swap = true
-				}
+				swap = s.Val(index[j]).(int) > s.Val(index[j+1]).(int)
 			case Float:
-				if s.Val(index[j]).(float64) > s.Val(index[j+1]).(float64) {
-					swap = true
-				}
+				swap = s.Val(index[j]).(float64) > s.Val(index[j+1]).(float64)
 			case Boolean:
-				panic("not implemented")
+				swap = s.Val(index[j]).(bool) && !s.Val(index[j+1]).(bool)
 			case String:
 				panic("not implemented")
 			case Runic:

@@ -10,21 +10,25 @@ import (
 
 // DecisionTreeClassifier is a struct that represents a decision tree classifier
 type DecisionTreeClassifier struct {
-	criterion string
-	maxDepth  int
+	maxDepth int
 	// minSamplesSplit int
 	// minSamplesLeaf int
 
-	//metric criterionFunction
-	tree *DecisionTree
+	criterionString string
+	criterion       criterionFunction
+	tree            *DecisionTree
+
+	features []string
+	target   string
 }
 
 // NewDecisionTreeClassifier creates a new DecisionTreeClassifier with default values
 func NewDecisionTreeClassifier() *DecisionTreeClassifier {
 	return &DecisionTreeClassifier{
-		criterion: "gini",
-		maxDepth:  -1,
-		tree:      nil,
+		criterionString: "gini",
+		criterion:       gini,
+		maxDepth:        -1,
+		tree:            nil,
 	}
 }
 
@@ -34,20 +38,31 @@ func (dtc *DecisionTreeClassifier) SetCriterion(criterion string) {
 		panic(fmt.Errorf("cannot set criterion after fit"))
 	}
 
-	possibleCriteria := []string{"gini", "entropy"}
+	criterionStrings := []string{"gini", "entropy"}
+	possibleCriteria := map[string]criterionFunction{
+		"gini":    gini,
+		"entropy": entropy,
+	}
 
-	for _, c := range possibleCriteria {
-		if c == criterion {
-			dtc.criterion = criterion
+	for k, c := range possibleCriteria {
+		if k == criterion {
+			dtc.criterion = c
+			dtc.criterionString = criterion
 			return
 		}
 	}
-	panic(fmt.Errorf("criterion must be one of %v, but got %v", possibleCriteria, criterion))
+
+	panic(fmt.Errorf("criterion must be one of %v, but got %v", criterionStrings, criterion))
 }
 
-// SetCriterionFromFunction sets the criterion for the DecisionTreeClassifier from a criterion function
-func (dtc DecisionTreeClassifier) SetCriterionFromFunction(criterion func()) {
-	panic("SetCriterionFromFunction not implemented")
+// SetCriterionFunction sets the criterion for the DecisionTreeClassifier from a criterion function
+func (dtc DecisionTreeClassifier) SetCriterionFunction(criterion criterionFunction) {
+	if dtc.tree != nil {
+		panic(fmt.Errorf("cannot set criterion after fit"))
+	}
+
+	dtc.criterionString = "other"
+	dtc.criterion = criterion
 }
 
 // SetMaxDepth sets the maximum depth of the DecisionTreeClassifier
@@ -93,12 +108,7 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 			dfYLeft := dfY.Slice(0, i)
 			dfYRight := dfY.Slice(i, numSamples)
 
-			var impurity float64
-			if dtc.criterion == "gini" {
-				impurity = gini(dfYLeft, dfYRight)
-			} else if dtc.criterion == "entropy" {
-				impurity = entropy(dfYLeft, dfYRight)
-			}
+			impurity := dtc.criterion(dfYLeft, dfYRight)
 
 			if impurity < minimumEntropy {
 				minimumEntropy = impurity
@@ -137,17 +147,11 @@ func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.
 
 // Fit fits the DecisionTreeClassifier to the data and creates the DecisionTree
 func (dtc *DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
-	// TODO: Implement fit for gini and entropy
-
-	numSamples, numFeatures := dfX.Shape()
+	numSamples, _ := dfX.Shape()
 	numOutputs := dfY.Len()
 
 	if numSamples != numOutputs {
 		panic(fmt.Errorf("number of samples %v and number of outputs %v must be equal", numSamples, numOutputs))
-	}
-
-	if numFeatures > 2 {
-		panic("fit not implemented for num_samples > 2") // TODO: implement...
 	}
 
 	objects := dfX.SelectObjectNames()
@@ -156,8 +160,8 @@ func (dtc *DecisionTreeClassifier) Fit(dfX dataframe.DataFrame, dfY series.Serie
 	}
 
 	dtc.tree = dtc.fitBranch(dfX, dfY, 1)
-	dtc.tree.features = dfX.Names()
-	dtc.tree.target = dfY.Name
+	dtc.features = dfX.Names()
+	dtc.target = dfY.Name
 }
 
 func (dtc DecisionTreeClassifier) predict(df dataframe.DataFrame, idx int) int {
@@ -184,15 +188,11 @@ func (dtc DecisionTreeClassifier) Predict(df dataframe.DataFrame) series.Series 
 		panic(fmt.Errorf("must fit model before predicting"))
 	}
 
-	numSamples, numFeatures := df.Shape()
-
-	if numFeatures > 2 {
-		panic("predict not implemented for num_samples > 2") // TODO: implement...
-	}
+	numSamples, _ := df.Shape()
 
 	for idx, name := range df.Names() {
-		if name != dtc.tree.features[idx] {
-			panic(fmt.Errorf("column %v does not match fit column %v", name, dtc.tree.features[idx]))
+		if name != dtc.features[idx] {
+			panic(fmt.Errorf("column %v does not match fit column %v", name, dtc.features[idx]))
 		}
 	}
 
@@ -202,7 +202,7 @@ func (dtc DecisionTreeClassifier) Predict(df dataframe.DataFrame) series.Series 
 		predictions[i] = dtc.predict(df, i)
 	}
 
-	return series.NewSeries(predictions, series.Int, dtc.tree.target)
+	return series.NewSeries(predictions, series.Int, dtc.target)
 }
 
 // IsClassifier returns true as DecisionTreeClassifier is a classifier

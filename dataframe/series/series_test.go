@@ -35,6 +35,16 @@ func TestNewSeriesBool(t *testing.T) {
 	// Output: {Booleans [true false true] bool}
 }
 
+func TestNewSeriesString(t *testing.T) {
+	expected := "{Strings [abc def ghi] string}"
+	s := NewSeries([]string{"abc", "def", "ghi"}, String, "Strings")
+
+	if s.String() != expected {
+		t.Errorf("Expected:\n%v\nGot:\n%v", expected, s.String())
+	}
+	// Output: {Strings [abc def ghi] string}
+}
+
 func TestSeries_Slice(t *testing.T) {
 	expected := "{Integers [2 3] int}"
 	s := NewSeries([]int{1, 2, 3, 4}, Int, "Integers")
@@ -225,13 +235,21 @@ func TestSeries_IsNumeric(t *testing.T) {
 }
 
 func TestSeries_IsObject(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf("Error: %v", r)
-		}
-	}()
+	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	object := s.IsObject()
 
-	panic("no object series implemented")
+	if object {
+		t.Errorf("Expected:\n%v\nGot:\n%v", false, object)
+	}
+	// Output: false
+
+	s = NewSeries([]string{"a", "b", "c"}, String, "Strings")
+	object = s.IsObject()
+
+	if !object {
+		t.Errorf("Expected:\n%v\nGot:\n%v", true, object)
+	}
+	// Output: true
 }
 
 func TestSeries_Len(t *testing.T) {
@@ -346,12 +364,15 @@ func TestSeries_Type(t *testing.T) {
 	}
 }
 
-func TestNewRangedSeries(t *testing.T) {
-	expected := "{Integers [1 2 3 4] int}"
-	s := NewRangedSeries(1, 5, Int, "Integers")
+func TestSeries_Append(t *testing.T) {
+	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s.Append(4)
 
+	expected := "{Integers [1 2 3 4] int}"
 	if s.String() != expected {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, s.String())
 	}
 	// Output: {Integers [1 2 3 4] int}
 }
+
+

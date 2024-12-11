@@ -19,9 +19,6 @@ type DecisionTree struct {
 
 	// requires integer encoding of labels prior to fitting
 	Label int
-
-	features []string
-	target  string
 }
 
 func (dt *DecisionTree) hasChildren() bool {
