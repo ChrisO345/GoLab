@@ -9,20 +9,20 @@ func NewRangedSeries(start, end int, t Type, name string) Series {
 		numRange[i-start] = i
 	}
 
-	return NewSeries(numRange, t, name)
+	return New(numRange, t, name)
 }
 
 // NewEmptySeries creates a new Series with no values.
 func NewEmptySeries(t Type, size int, name string) Series {
 	switch t {
 	case Int:
-		return NewSeries(make([]int, size), t, name)
+		return New(make([]int, size), t, name)
 	case Float:
-		return NewSeries(make([]float64, size), t, name)
+		return New(make([]float64, size), t, name)
 	case Boolean:
-		return NewSeries(make([]bool, size), t, name)
+		return New(make([]bool, size), t, name)
 	case String:
-		return NewSeries(make([]string, size), t, name)
+		return New(make([]string, size), t, name)
 	case Runic:
 		panic("not implemented")
 	default:

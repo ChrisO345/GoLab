@@ -7,7 +7,7 @@ import (
 
 func TestNewSeriesInt(t *testing.T) {
 	expected := "{Integers [1 2 3] int}"
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 
 	if s.String() != expected {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, s.String())
@@ -17,7 +17,7 @@ func TestNewSeriesInt(t *testing.T) {
 
 func TestNewSeriesFloat(t *testing.T) {
 	expected := "{Floats [1.1 2.2 3.3] float}"
-	s := NewSeries([]float64{1.1, 2.2, 3.3}, Float, "Floats")
+	s := New([]float64{1.1, 2.2, 3.3}, Float, "Floats")
 
 	if s.String() != expected {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, s.String())
@@ -27,7 +27,7 @@ func TestNewSeriesFloat(t *testing.T) {
 
 func TestNewSeriesBool(t *testing.T) {
 	expected := "{Booleans [true false true] bool}"
-	s := NewSeries([]bool{true, false, true}, Boolean, "Booleans")
+	s := New([]bool{true, false, true}, Boolean, "Booleans")
 
 	if s.String() != expected {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, s.String())
@@ -37,7 +37,7 @@ func TestNewSeriesBool(t *testing.T) {
 
 func TestNewSeriesString(t *testing.T) {
 	expected := "{Strings [abc def ghi] string}"
-	s := NewSeries([]string{"abc", "def", "ghi"}, String, "Strings")
+	s := New([]string{"abc", "def", "ghi"}, String, "Strings")
 
 	if s.String() != expected {
 		t.Errorf("Expected:\n%v\nGot:\n%v", expected, s.String())
@@ -47,7 +47,7 @@ func TestNewSeriesString(t *testing.T) {
 
 func TestSeries_Slice(t *testing.T) {
 	expected := "{Integers [2 3] int}"
-	s := NewSeries([]int{1, 2, 3, 4}, Int, "Integers")
+	s := New([]int{1, 2, 3, 4}, Int, "Integers")
 	se := s.Slice(1, 3)
 
 	if se.String() != expected {
@@ -58,7 +58,7 @@ func TestSeries_Slice(t *testing.T) {
 
 func TestSeries_Head(t *testing.T) {
 	expected := "{Integers [1 2] int}"
-	s := NewSeries([]int{1, 2, 3, 4}, Int, "Integers")
+	s := New([]int{1, 2, 3, 4}, Int, "Integers")
 	se := s.Head(2)
 
 	if se.String() != expected {
@@ -69,7 +69,7 @@ func TestSeries_Head(t *testing.T) {
 
 func TestSeries_Tail(t *testing.T) {
 	expected := "{Integers [3 4] int}"
-	s := NewSeries([]int{1, 2, 3, 4}, Int, "Integers")
+	s := New([]int{1, 2, 3, 4}, Int, "Integers")
 	se := s.Tail(2)
 
 	if se.String() != expected {
@@ -80,7 +80,7 @@ func TestSeries_Tail(t *testing.T) {
 
 func TestSeries_SortInt(t *testing.T) {
 	expected := "{Integers [1 2 3] int}"
-	s := NewSeries([]int{3, 1, 2}, Int, "Integers")
+	s := New([]int{3, 1, 2}, Int, "Integers")
 	s.Sort()
 
 	if s.String() != expected {
@@ -91,7 +91,7 @@ func TestSeries_SortInt(t *testing.T) {
 
 func TestSeries_SortFloat(t *testing.T) {
 	expected := "{Floats [1.1 2.2 3.3] float}"
-	s := NewSeries([]float64{3.3, 1.1, 2.2}, Float, "Floats")
+	s := New([]float64{3.3, 1.1, 2.2}, Float, "Floats")
 	s.Sort()
 
 	if s.String() != expected {
@@ -102,7 +102,7 @@ func TestSeries_SortFloat(t *testing.T) {
 
 func TestSeries_OrderInt(t *testing.T) {
 	expected := "{Integers [3 1 2] int}"
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	se := s.Order([]int{2, 0, 1}...)
 
 	if se.String() != expected {
@@ -113,7 +113,7 @@ func TestSeries_OrderInt(t *testing.T) {
 
 func TestSeries_ValueCounts(t *testing.T) {
 	expected := map[interface{}]int{1: 2, 2: 2, 3: 1}
-	s := NewSeries([]int{1, 2, 3, 2, 1}, Int, "Integers")
+	s := New([]int{1, 2, 3, 2, 1}, Int, "Integers")
 	unique := s.ValueCounts()
 
 	for k, v := range unique {
@@ -127,7 +127,7 @@ func TestSeries_ValueCounts(t *testing.T) {
 
 func TestSeries_Sort(t *testing.T) {
 	expected := "{Integers [1 2 3] int}"
-	s := NewSeries([]int{3, 1, 2}, Int, "Integers")
+	s := New([]int{3, 1, 2}, Int, "Integers")
 	s.Sort()
 
 	if s.String() != expected {
@@ -136,7 +136,7 @@ func TestSeries_Sort(t *testing.T) {
 	// Output: {Integers [1 2 3] int}
 
 	expected = "{Integers [1 2 3 4 5 6 7 8 9] int}"
-	s = NewSeries([]int{3, 9, 5, 7, 6, 8, 1, 2, 4}, Int, "Integers")
+	s = New([]int{3, 9, 5, 7, 6, 8, 1, 2, 4}, Int, "Integers")
 	s.Sort()
 
 	if s.String() != expected {
@@ -145,7 +145,7 @@ func TestSeries_Sort(t *testing.T) {
 }
 
 func TestSeries_Count(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3, 2, 1}, Int, "Integers")
+	s := New([]int{1, 2, 3, 2, 1}, Int, "Integers")
 	count := s.Count(1)
 
 	if count != 2 {
@@ -155,7 +155,7 @@ func TestSeries_Count(t *testing.T) {
 }
 
 func TestSeries_Unique(t *testing.T) {
-	s := NewSeries([]int{1, 4, 5, 2}, Int, "Integers")
+	s := New([]int{1, 4, 5, 2}, Int, "Integers")
 	unique := s.Unique()
 
 	if !unique {
@@ -163,7 +163,7 @@ func TestSeries_Unique(t *testing.T) {
 	}
 	// Output: true
 
-	s = NewSeries([]int{1, 2, 3, 2, 1, 1}, Int, "Integers")
+	s = New([]int{1, 2, 3, 2, 1, 1}, Int, "Integers")
 	unique = s.Unique()
 
 	if unique {
@@ -173,7 +173,7 @@ func TestSeries_Unique(t *testing.T) {
 }
 
 func TestSeries_Homogeneous(t *testing.T) {
-	s := NewSeries([]float64{1.1, 1.1, 1.1, 1.1}, Float, "Floats")
+	s := New([]float64{1.1, 1.1, 1.1, 1.1}, Float, "Floats")
 	homogeneous := s.Homogeneous()
 
 	if !homogeneous {
@@ -181,7 +181,7 @@ func TestSeries_Homogeneous(t *testing.T) {
 	}
 	// Output: true
 
-	s = NewSeries([]float64{1.1, 1.1, 1.1, 1.2}, Float, "Floats")
+	s = New([]float64{1.1, 1.1, 1.1, 1.2}, Float, "Floats")
 	homogeneous = s.Homogeneous()
 
 	if homogeneous {
@@ -190,7 +190,7 @@ func TestSeries_Homogeneous(t *testing.T) {
 }
 
 func TestSeries_Copy(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	se := s.Copy()
 
 	if se.String() != s.String() {
@@ -200,7 +200,7 @@ func TestSeries_Copy(t *testing.T) {
 }
 
 func TestSeries_Elem(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	e := s.Elem(1)
 
 	if e.Get() != 2 {
@@ -208,7 +208,7 @@ func TestSeries_Elem(t *testing.T) {
 	}
 	// Output: 2
 
-	s = NewSeries([]bool{true, false, true}, Boolean, "Booleans")
+	s = New([]bool{true, false, true}, Boolean, "Booleans")
 	e = s.Elem(1)
 
 	if e.Get() != false {
@@ -217,7 +217,7 @@ func TestSeries_Elem(t *testing.T) {
 }
 
 func TestSeries_IsNumeric(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	numeric := s.IsNumeric()
 
 	if !numeric {
@@ -225,7 +225,7 @@ func TestSeries_IsNumeric(t *testing.T) {
 	}
 	// Output: true
 
-	s = NewSeries([]bool{true, false, true}, Boolean, "Booleans")
+	s = New([]bool{true, false, true}, Boolean, "Booleans")
 	numeric = s.IsNumeric()
 
 	if !numeric {
@@ -235,7 +235,7 @@ func TestSeries_IsNumeric(t *testing.T) {
 }
 
 func TestSeries_IsObject(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	object := s.IsObject()
 
 	if object {
@@ -243,7 +243,7 @@ func TestSeries_IsObject(t *testing.T) {
 	}
 	// Output: false
 
-	s = NewSeries([]string{"a", "b", "c"}, String, "Strings")
+	s = New([]string{"a", "b", "c"}, String, "Strings")
 	object = s.IsObject()
 
 	if !object {
@@ -253,7 +253,7 @@ func TestSeries_IsObject(t *testing.T) {
 }
 
 func TestSeries_Len(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	l := s.Len()
 
 	if l != 3 {
@@ -263,7 +263,7 @@ func TestSeries_Len(t *testing.T) {
 }
 
 func TestSeries_HasNa(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	na := s.HasNa()
 
 	if na {
@@ -271,7 +271,7 @@ func TestSeries_HasNa(t *testing.T) {
 	}
 	// Output: false
 
-	s = NewSeries([]float64{1.1, 1.2, 1.3, 1.4, 1.5, math.Inf(1)}, Float, "Floats")
+	s = New([]float64{1.1, 1.2, 1.3, 1.4, 1.5, math.Inf(1)}, Float, "Floats")
 	na = s.HasNa()
 
 	if !na {
@@ -279,7 +279,7 @@ func TestSeries_HasNa(t *testing.T) {
 	}
 	// Output: true
 
-	s = NewSeries([]float64{1.1, 1.2, 1.3, 1.4, 1.5, math.NaN()}, Float, "Floats")
+	s = New([]float64{1.1, 1.2, 1.3, 1.4, 1.5, math.NaN()}, Float, "Floats")
 	na = s.HasNa()
 
 	if !na {
@@ -288,7 +288,7 @@ func TestSeries_HasNa(t *testing.T) {
 }
 
 func TestSeries_NUnique(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3, 2, 1}, Int, "Integers")
+	s := New([]int{1, 2, 3, 2, 1}, Int, "Integers")
 	unique := s.NUnique()
 
 	if unique != 3 {
@@ -299,7 +299,7 @@ func TestSeries_NUnique(t *testing.T) {
 
 func TestSeries_Order(t *testing.T) {
 	expected := "{Integers [3 2 1] int}"
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	se := s.Order(2, 1, 0)
 
 	if se.String() != expected {
@@ -311,7 +311,7 @@ func TestSeries_Order(t *testing.T) {
 func TestSeries_SortedIndex(t *testing.T) {
 	expected := []int{1, 2, 0}
 
-	s := NewSeries([]int{3, 1, 2}, Int, "Integers")
+	s := New([]int{3, 1, 2}, Int, "Integers")
 	index := s.SortedIndex()
 
 	if index[0] != expected[0] || index[1] != expected[1] || index[2] != expected[2] {
@@ -321,7 +321,7 @@ func TestSeries_SortedIndex(t *testing.T) {
 }
 
 func TestSeries_String(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	expected := "{Integers [1 2 3] int}"
 
 	if s.String() != expected {
@@ -331,7 +331,7 @@ func TestSeries_String(t *testing.T) {
 }
 
 func TestSeries_Val(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	v := s.Val(1)
 
 	if v != 2 {
@@ -341,7 +341,7 @@ func TestSeries_Val(t *testing.T) {
 }
 
 func TestSeries_Type(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	typ := s.Type()
 
 	if typ != Int {
@@ -349,14 +349,14 @@ func TestSeries_Type(t *testing.T) {
 	}
 	// Output: int
 
-	s = NewSeries([]float64{1.1, 1.2, 1.3}, Float, "Floats")
+	s = New([]float64{1.1, 1.2, 1.3}, Float, "Floats")
 	typ = s.Type()
 
 	if typ != Float {
 		t.Errorf("Expected:\n%v\nGot:\n%v", Float, typ)
 	}
 
-	s = NewSeries([]bool{true, false, true}, Boolean, "Booleans")
+	s = New([]bool{true, false, true}, Boolean, "Booleans")
 	typ = s.Type()
 
 	if typ != Boolean {
@@ -365,7 +365,7 @@ func TestSeries_Type(t *testing.T) {
 }
 
 func TestSeries_Append(t *testing.T) {
-	s := NewSeries([]int{1, 2, 3}, Int, "Integers")
+	s := New([]int{1, 2, 3}, Int, "Integers")
 	s.Append(4)
 
 	expected := "{Integers [1 2 3 4] int}"
@@ -375,4 +375,55 @@ func TestSeries_Append(t *testing.T) {
 	// Output: {Integers [1 2 3 4] int}
 }
 
+func TestSeries_Mean(t *testing.T) {
+	s := New([]int{1, 2, 3}, Int, "Integers")
+	mean := s.Mean()
 
+	if mean != 2 {
+		t.Errorf("Expected:\n%v\nGot:\n%v", 2, mean)
+	}
+	// Output: 2
+
+	s = New([]float64{1.1, 1.2, 1.3}, Float, "Floats")
+	mean = s.Mean()
+
+	if mean != 1.2 {
+		t.Errorf("Expected:\n%v\nGot:\n%v", 1.2, mean)
+	}
+	// Output: 1.2
+}
+
+func TestSeries_Mode(t *testing.T) {
+	s := New([]int{1, 2, 3, 2, 1}, Int, "Integers")
+	mode := s.Mode()
+
+	if mode != 1 {
+		t.Errorf("Expected:\n%v\nGot:\n%v", 1, mode)
+	}
+	// Output: 1
+}
+
+func TestSeries_Quantile(t *testing.T) {
+	s := New([]int{1, 2, 3, 4, 5}, Int, "Integers")
+	q := s.Quantile(0.5)
+
+	if q != 3 {
+		t.Errorf("Expected:\n%v\nGot:\n%v", 3, q)
+	}
+	// Output: 3
+
+	q = s.Quantile(0.25)
+	if q != 2 {
+		t.Errorf("Expected:\n%v\nGot:\n%v", 2, q)
+	}
+}
+
+func TestSeries_Median(t *testing.T) {
+	s := New([]int{1, 2, 3, 4, 5}, Int, "Integers")
+	median := s.Median()
+
+	if median != 3 {
+		t.Errorf("Expected:\n%v\nGot:\n%v", 3, median)
+	}
+	// Output: 3
+}

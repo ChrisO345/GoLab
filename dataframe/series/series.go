@@ -92,8 +92,8 @@ const (
 	Runic   Type = "rune"
 )
 
-// NewSeries creates a new series from a slice of values of type t, and a name
-func NewSeries(v interface{}, t Type, name string) Series {
+// New creates a new series from a slice of values of type t, and a name
+func New(v interface{}, t Type, name string) Series {
 	s := Series{Name: name, t: t}
 
 	allocMemory := func(n int) {
@@ -144,7 +144,6 @@ func NewSeries(v interface{}, t Type, name string) Series {
 		}
 	case []rune:
 		panic("not implemented")
-
 	default:
 		panic("unsupported type")
 	}
@@ -439,4 +438,63 @@ func (s Series) IsNumeric() bool {
 // IsObject returns true if the series is of a non-numeric type (string, rune, object)
 func (s Series) IsObject() bool {
 	return s.t == String || s.t == Runic
+}
+
+// Mode returns the most frequent value in the series
+func (s Series) Mode() interface{} {
+	// TODO: mode only returns the first mode, need to return all modes
+	counts := s.ValueCounts()
+	max := 0
+	var mode interface{}
+	for k, v := range counts {
+		if v > max {
+			max = v
+			mode = k
+		}
+	}
+	return mode
+}
+
+// Mean returns the mean of the series
+func (s Series) Mean() float64 {
+	if !s.IsNumeric() {
+		panic(fmt.Errorf("mean is only supported for numeric types"))
+	}
+
+	var sum float64
+	for i := 0; i < s.Len(); i++ {
+		switch s.t {
+		case Int:
+			sum += float64(s.Val(i).(int))
+		case Float:
+			sum += s.Val(i).(float64)
+		case Boolean:
+			if s.Val(i).(bool) {
+				sum++
+			}
+		}
+	}
+
+	return sum / float64(s.Len())
+}
+
+// Quantile returns the specified quantile of the series
+func (s Series) Quantile(q float64) interface{} {
+	if !s.IsNumeric() {
+		panic(fmt.Errorf("quantile is only supported for numeric types"))
+	}
+
+	if q < 0 || q > 1 {
+		panic(fmt.Errorf("quantile must be between 0 and 1, but got %v", q))
+	}
+
+	se := s.Copy()
+	se.Sort()
+	index := int(float64(s.Len()) * q)
+	return se.Val(index)
+}
+
+// Median returns the median of the series
+func (s Series) Median() interface{} {
+	return s.Quantile(0.5)
 }

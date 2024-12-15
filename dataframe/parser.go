@@ -91,7 +91,7 @@ func FromCSV(path string, settings ...CSVSettings) *DataFrame {
 		}
 	}
 
-	df := NewDataFrame(se...)
+	df := New(se...)
 	return &df
 }
 

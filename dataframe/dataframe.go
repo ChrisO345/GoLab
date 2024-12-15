@@ -16,9 +16,9 @@ type DataFrame struct {
 	nrows   int
 }
 
-// NewDataFrame creates a new DataFrame from a collection of series.Series.
+// New creates a new DataFrame from a collection of series.Series.
 // It has a shared index which defaults to a range of integers.
-func NewDataFrame(se ...series.Series) DataFrame {
+func New(se ...series.Series) DataFrame {
 	if se == nil || len(se) == 0 {
 		panic("empty Series")
 	}
@@ -29,7 +29,7 @@ func NewDataFrame(se ...series.Series) DataFrame {
 		indices[i] = i
 	}
 
-	index := series.NewSeries(indices, series.Int, "Index")
+	index := series.New(indices, series.Int, "Index")
 
 	columns := make([]series.Series, len(se))
 	for i, s := range se {
@@ -170,7 +170,7 @@ func (df DataFrame) ResetIndex() DataFrame {
 		indices[i] = i
 	}
 
-	df.index = series.NewSeries(indices, series.Int, "Index")
+	df.index = series.New(indices, series.Int, "Index")
 	return df
 }
 
@@ -194,7 +194,7 @@ func (df DataFrame) Slice(a, b int) DataFrame{
 		s = append(s, se.Slice(a, b))
 	}
 
-	dfNew := NewDataFrame(s...)
+	dfNew := New(s...)
 	dfNew.index = df.index.Slice(a, b)
 	return dfNew
 }
@@ -329,7 +329,7 @@ func (df DataFrame) Copy() DataFrame {
 		s = append(s, se.Copy())
 	}
 
-	dfNew := NewDataFrame(s...)
+	dfNew := New(s...)
 	dfNew.index = df.index.Copy()
 	return dfNew
 }

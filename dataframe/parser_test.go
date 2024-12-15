@@ -17,7 +17,7 @@ func TestFromCSV(t *testing.T) {
 func TestParseSQL(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
-			t.Errorf("Expected ParseSQL to panic, but it did not")
+			t.Errorf("ParseSQL not implemented")
 		}
 	}()
 

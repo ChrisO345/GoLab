@@ -202,7 +202,7 @@ func (dtc DecisionTreeClassifier) Predict(df dataframe.DataFrame) series.Series 
 		predictions[i] = dtc.predict(df, i)
 	}
 
-	return series.NewSeries(predictions, series.Int, dtc.target)
+	return series.New(predictions, series.Int, dtc.target)
 }
 
 // IsClassifier returns true as DecisionTreeClassifier is a classifier
