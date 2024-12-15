@@ -3,7 +3,6 @@ package tree
 import (
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -134,8 +133,6 @@ func TestDecisionTreeClassifier_FitEntropy2(t *testing.T) {
 	dfY := series.New([]int{0, 2, 1, 2, 0, 1, 2, 1, 2, 0, 0, 0, 1, 2, 1, 2, 0, 1, 2, 0}, series.Int, "Target")
 	
 	dtc.Fit(dfX, dfY)
-	
-	fmt.Println(dtc.tree.String())
 }
 
 func TestDecisionTreeClassifier_Predict(t *testing.T) {

@@ -220,8 +220,6 @@ func (df DataFrame) Tail(n ...int) DataFrame {
 		n = []int{5}
 	}
 
-	fmt.Println(df.nrows, n[0])
-
 	return df.Slice(df.nrows-n[0], df.nrows)
 }
 

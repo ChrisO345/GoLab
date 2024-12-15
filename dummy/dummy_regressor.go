@@ -79,6 +79,10 @@ func (dr *DummyRegressor) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 }
 
 func (dr *DummyRegressor) Predict(dfX dataframe.DataFrame) series.Series {
+	if dr.result == nil {
+		panic(fmt.Errorf("DummyRegressor is not fitted"))
+	}
+
 	numSamples, _ := dfX.Shape()
 
 	predictions := make([]float64, numSamples)
