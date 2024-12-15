@@ -112,7 +112,7 @@ func TestSeries_OrderInt(t *testing.T) {
 }
 
 func TestSeries_ValueCounts(t *testing.T) {
-	expected := map[interface{}]int{1: 2, 2: 2, 3: 1}
+	expected := map[any]int{1: 2, 2: 2, 3: 1}
 	s := New([]int{1, 2, 3, 2, 1}, Int, "Integers")
 	unique := s.ValueCounts()
 

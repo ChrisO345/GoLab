@@ -12,7 +12,7 @@ type DummyClassifier struct {
 	strategy string
 
 	seriesType series.Type
-	result     interface{}
+	result     any
 
 	features []string
 	target   string

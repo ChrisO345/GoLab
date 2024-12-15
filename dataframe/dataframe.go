@@ -224,7 +224,7 @@ func (df DataFrame) Tail(n ...int) DataFrame {
 }
 
 // At returns the value at the specified row and column of the DataFrame.
-func (df DataFrame) At(i, j int) interface{} {
+func (df DataFrame) At(i, j int) any {
 	if i < 0 || i >= df.nrows {
 		panic(fmt.Errorf("index %v out of range", i))
 	}

@@ -13,7 +13,7 @@ type DummyRegressor struct {
 	quantile float64
 
 	seriesType series.Type
-	result     interface{}
+	result     any
 
 	features []string
 	target   string

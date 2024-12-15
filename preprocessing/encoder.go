@@ -22,7 +22,7 @@ var _ Encoder = (*OneHotEncoder)(nil)
 // OneHotEncoder is a struct that represents a one-hot encoder
 type OneHotEncoder struct {
 	featureNames []string
-	encoder      map[string][]interface{}
+	encoder      map[string][]any
 	nUnique      int
 }
 
@@ -38,14 +38,14 @@ func NewOneHotEncoder() *OneHotEncoder {
 func (ohe *OneHotEncoder) Fit(dfX dataframe.DataFrame) {
 	ohe.featureNames = dfX.Names()
 
-	ohe.encoder = make(map[string][]interface{}, len(ohe.featureNames))
+	ohe.encoder = make(map[string][]any, len(ohe.featureNames))
 
 	ohe.nUnique = 0
 	for _, name := range ohe.featureNames {
 		uniqueValues := dfX.Column(name).ValueCounts()
 		ohe.nUnique += len(uniqueValues)
 
-		ohe.encoder[name] = make([]interface{}, len(uniqueValues))
+		ohe.encoder[name] = make([]any, len(uniqueValues))
 
 		cnt := 0
 		for key, _ := range uniqueValues {

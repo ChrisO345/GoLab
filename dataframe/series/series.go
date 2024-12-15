@@ -16,13 +16,13 @@ type Series struct {
 type Elements interface {
 	Elem(int) Element
 	Len() int
-	Values() []interface{}
+	Values() []any
 }
 
 // Element is an interface that defines the methods that an element must implement
 type Element interface {
-	Set(interface{})
-	Get() interface{}
+	Set(any)
+	Get() any
 
 	IsNA() bool
 	IsNumeric() bool
@@ -34,8 +34,8 @@ type intElements []intElement
 
 func (i intElements) Len() int           { return len(i) }
 func (i intElements) Elem(j int) Element { return &i[j] }
-func (i intElements) Values() []interface{} { // TODO: improve the way that this is implemented
-	v := make([]interface{}, len(i))
+func (i intElements) Values() []any { // TODO: improve the way that this is implemented
+	v := make([]any, len(i))
 	for j, e := range i {
 		v[j] = e.e
 	}
@@ -47,8 +47,8 @@ type floatElements []floatElement
 
 func (f floatElements) Len() int           { return len(f) }
 func (f floatElements) Elem(j int) Element { return &f[j] }
-func (f floatElements) Values() []interface{} {
-	v := make([]interface{}, len(f))
+func (f floatElements) Values() []any {
+	v := make([]any, len(f))
 	for j, e := range f {
 		v[j] = e.e
 	}
@@ -60,8 +60,8 @@ type booleanElements []booleanElement
 
 func (b booleanElements) Len() int           { return len(b) }
 func (b booleanElements) Elem(j int) Element { return &b[j] }
-func (b booleanElements) Values() []interface{} {
-	v := make([]interface{}, len(b))
+func (b booleanElements) Values() []any {
+	v := make([]any, len(b))
 	for j, e := range b {
 		v[j] = e.e
 	}
@@ -73,8 +73,8 @@ type stringElements []stringElement
 
 func (s stringElements) Len() int           { return len(s) }
 func (s stringElements) Elem(j int) Element { return &s[j] }
-func (s stringElements) Values() []interface{} {
-	v := make([]interface{}, len(s))
+func (s stringElements) Values() []any {
+	v := make([]any, len(s))
 	for j, e := range s {
 		v[j] = e.e
 	}
@@ -93,7 +93,7 @@ const (
 )
 
 // New creates a new series from a slice of values of type t, and a name
-func New(v interface{}, t Type, name string) Series {
+func New(v any, t Type, name string) Series {
 	s := Series{Name: name, t: t}
 
 	allocMemory := func(n int) {
@@ -187,7 +187,7 @@ func (s Series) Len() int {
 }
 
 // Append appends a value to the series
-func (s *Series) Append(v interface{}) {
+func (s *Series) Append(v any) {
 	switch s.t {
 	case Int:
 		s.elements = append(s.elements.(intElements), intElement{e: v.(int)})
@@ -208,7 +208,7 @@ func (s Series) String() string {
 }
 
 // Val returns the value of the element at index i
-func (s Series) Val(i int) interface{} {
+func (s Series) Val(i int) any {
 	return s.elements.Elem(i).Get()
 }
 
@@ -369,7 +369,7 @@ func (s Series) Order(positions ...int) Series {
 }
 
 // Count returns the number of occurrences of the value v in the series
-func (s Series) Count(v interface{}) int {
+func (s Series) Count(v any) int {
 	count := 0
 	for i := 0; i < s.Len(); i++ {
 		if s.Val(i) == v {
@@ -381,7 +381,7 @@ func (s Series) Count(v interface{}) int {
 
 // Unique returns the true if there are no duplicates in the series
 func (s Series) Unique() bool {
-	seen := make(map[interface{}]struct{})
+	seen := make(map[any]struct{})
 	for i := 0; i < s.Len(); i++ {
 		if _, ok := seen[s.Val(i)]; ok {
 			return false
@@ -408,7 +408,7 @@ func (s Series) Homogeneous() bool {
 
 // NUnique returns the number of unique values in the series
 func (s Series) NUnique() int {
-	seen := make(map[interface{}]struct{})
+	seen := make(map[any]struct{})
 	for i := 0; i < s.Len(); i++ {
 		seen[s.Val(i)] = struct{}{}
 	}
@@ -416,8 +416,8 @@ func (s Series) NUnique() int {
 }
 
 // ValueCounts returns a slice of the unique values in the series
-func (s Series) ValueCounts() map[interface{}]int {
-	seen := make(map[interface{}]int)
+func (s Series) ValueCounts() map[any]int {
+	seen := make(map[any]int)
 	for i := 0; i < s.Len(); i++ {
 		seen[s.Val(i)] = seen[s.Val(i)] + 1
 	}
@@ -441,11 +441,11 @@ func (s Series) IsObject() bool {
 }
 
 // Mode returns the most frequent value in the series
-func (s Series) Mode() interface{} {
+func (s Series) Mode() any {
 	// TODO: mode only returns the first mode, need to return all modes
 	counts := s.ValueCounts()
 	max := 0
-	var mode interface{}
+	var mode any
 	for k, v := range counts {
 		if v > max {
 			max = v
@@ -479,7 +479,7 @@ func (s Series) Mean() float64 {
 }
 
 // Quantile returns the specified quantile of the series
-func (s Series) Quantile(q float64) interface{} {
+func (s Series) Quantile(q float64) any {
 	if !s.IsNumeric() {
 		panic(fmt.Errorf("quantile is only supported for numeric types"))
 	}
@@ -495,6 +495,6 @@ func (s Series) Quantile(q float64) interface{} {
 }
 
 // Median returns the median of the series
-func (s Series) Median() interface{} {
+func (s Series) Median() any {
 	return s.Quantile(0.5)
 }

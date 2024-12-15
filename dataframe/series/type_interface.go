@@ -13,7 +13,7 @@ type intElement struct {
 // force implementation of Element interface
 var _ Element = (*intElement)(nil)
 
-func (i *intElement) Set(value interface{}) {
+func (i *intElement) Set(value any) {
 	i.nan = false
 
 	switch v := value.(type) {
@@ -37,7 +37,7 @@ func (i *intElement) Set(value interface{}) {
 	}
 }
 
-func (i intElement) Get() interface{} {
+func (i intElement) Get() any {
 	return i.e
 }
 
@@ -61,7 +61,7 @@ type floatElement struct {
 // force implementation of Element interface
 var _ Element = (*floatElement)(nil)
 
-func (f *floatElement) Set(value interface{}) {
+func (f *floatElement) Set(value any) {
 	f.nan = false
 
 	switch v := value.(type) {
@@ -85,7 +85,7 @@ func (f *floatElement) Set(value interface{}) {
 	}
 }
 
-func (f floatElement) Get() interface{} {
+func (f floatElement) Get() any {
 	return f.e
 }
 
@@ -109,7 +109,7 @@ type booleanElement struct {
 // force implementation of Element interface
 var _ Element = (*booleanElement)(nil)
 
-func (b *booleanElement) Set(value interface{}) {
+func (b *booleanElement) Set(value any) {
 	b.nan = false
 
 	switch v := value.(type) {
@@ -129,7 +129,7 @@ func (b *booleanElement) Set(value interface{}) {
 	}
 }
 
-func (b booleanElement) Get() interface{} {
+func (b booleanElement) Get() any {
 	return b.e
 }
 
@@ -153,7 +153,7 @@ type stringElement struct {
 // force implementation of Element interface
 var _ Element = (*stringElement)(nil)
 
-func (s *stringElement) Set(value interface{}) {
+func (s *stringElement) Set(value any) {
 	s.nan = false
 
 	switch v := value.(type) {
@@ -173,7 +173,7 @@ func (s *stringElement) Set(value interface{}) {
 	}
 }
 
-func (s stringElement) Get() interface{} {
+func (s stringElement) Get() any {
 	return s.e
 }
 
