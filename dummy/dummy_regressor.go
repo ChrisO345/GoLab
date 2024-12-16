@@ -1,10 +1,10 @@
 package dummy
 
 import (
-	"GoLab"
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
 	"fmt"
+	"github.com/chriso345/golab"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 )
 
 // DummyRegressor is a struct that represents a dummy regressor
@@ -55,7 +55,7 @@ func (dr *DummyRegressor) SetQuantile(quantile float64) {
 }
 
 // force implementation of Model interface
-var _ GoLab.Model = (*DummyRegressor)(nil)
+var _ golab.Model = (*DummyRegressor)(nil)
 
 func (dr *DummyRegressor) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	numSamples, _ := dfX.Shape()

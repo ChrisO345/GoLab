@@ -1,9 +1,9 @@
 package preprocessing
 
 import (
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
 	"fmt"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 )
 
 type Encoder interface {

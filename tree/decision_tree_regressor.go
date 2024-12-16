@@ -1,10 +1,10 @@
 package tree
 
 import (
-	"GoLab"
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
 	"fmt"
+	"github.com/chriso345/golab"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 )
 
 // DecisionTreeRegressor is a struct that represents a decision tree classifier
@@ -22,7 +22,7 @@ type DecisionTreeRegressor struct {
 }
 
 // force implementation of Model interface
-var _ GoLab.Model = (*DecisionTreeRegressor)(nil)
+var _ golab.Model = (*DecisionTreeRegressor)(nil)
 
 // NewDecisionTreeRegressor creates a new DecisionTreeRegressor with default values
 func NewDecisionTreeRegressor() *DecisionTreeRegressor {

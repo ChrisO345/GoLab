@@ -1,8 +1,8 @@
-package GoLab
+package golab
 
 import (
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 )
 
 // Model defines the interface for the all machine learning models

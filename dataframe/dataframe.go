@@ -1,8 +1,8 @@
 package dataframe
 
 import (
-	"GoLab/dataframe/series"
 	"fmt"
+	"github.com/chriso345/golab/dataframe/series"
 	"strings"
 )
 

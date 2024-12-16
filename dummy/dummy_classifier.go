@@ -1,10 +1,10 @@
 package dummy
 
 import (
-	"GoLab"
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
 	"fmt"
+	"github.com/chriso345/golab"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 )
 
 // DummyClassifier is a struct that represents a dummy classifier
@@ -41,7 +41,7 @@ func (dc *DummyClassifier) SetStrategy(strategy string) {
 }
 
 // force implementation of Model interface
-var _ GoLab.Model = (*DummyClassifier)(nil)
+var _ golab.Model = (*DummyClassifier)(nil)
 
 func (dc *DummyClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	numSamples, _ := dfX.Shape()

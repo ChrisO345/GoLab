@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"GoLab/dataframe/series"
+	"github.com/chriso345/golab/dataframe/series"
 	"math"
 )
 

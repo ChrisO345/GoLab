@@ -1,9 +1,9 @@
 package linear
 
 import (
-	"GoLab"
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
+	"github.com/chriso345/golab"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 )
 
 type LogisticRegression struct {
@@ -21,7 +21,7 @@ func NewLogisticRegression() *LogisticRegression {
 }
 
 // force implementation of Model interface
-var _ GoLab.Model = (*LogisticRegression)(nil)
+var _ golab.Model = (*LogisticRegression)(nil)
 
 func (lr LogisticRegression) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	// TODO: Implement fit for logistic regression

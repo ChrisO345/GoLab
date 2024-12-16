@@ -1,10 +1,10 @@
 package dataframe
 
 import (
-	"GoLab/dataframe/series"
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"github.com/chriso345/golab/dataframe/series"
 	"io"
 	"os"
 )

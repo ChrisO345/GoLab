@@ -1,10 +1,10 @@
 package tree
 
 import (
-	"GoLab"
-	"GoLab/dataframe"
-	"GoLab/dataframe/series"
 	"fmt"
+	"github.com/chriso345/golab"
+	"github.com/chriso345/golab/dataframe"
+	"github.com/chriso345/golab/dataframe/series"
 	"math"
 )
 
@@ -78,7 +78,7 @@ func (dtc *DecisionTreeClassifier) SetMaxDepth(maxDepth int) {
 }
 
 // force implementation of Model interface
-var _ GoLab.Model = (*DecisionTreeClassifier)(nil)
+var _ golab.Model = (*DecisionTreeClassifier)(nil)
 
 func (dtc DecisionTreeClassifier) fitBranch(dfX dataframe.DataFrame, dfY series.Series, depth int) *DecisionTree {
 	numSamples, _ := dfX.Shape()
