@@ -1,7 +1,7 @@
 package dummy
 
 import (
-	"GoLab/base"
+	"GoLab"
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
 	"fmt"
@@ -41,7 +41,7 @@ func (dc *DummyClassifier) SetStrategy(strategy string) {
 }
 
 // force implementation of Model interface
-var _ base.Model = (*DummyClassifier)(nil)
+var _ GoLab.Model = (*DummyClassifier)(nil)
 
 func (dc *DummyClassifier) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	numSamples, _ := dfX.Shape()

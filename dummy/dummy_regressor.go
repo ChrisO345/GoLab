@@ -1,7 +1,7 @@
 package dummy
 
 import (
-	"GoLab/base"
+	"GoLab"
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
 	"fmt"
@@ -55,7 +55,7 @@ func (dr *DummyRegressor) SetQuantile(quantile float64) {
 }
 
 // force implementation of Model interface
-var _ base.Model = (*DummyRegressor)(nil)
+var _ GoLab.Model = (*DummyRegressor)(nil)
 
 func (dr *DummyRegressor) Fit(dfX dataframe.DataFrame, dfY series.Series) {
 	numSamples, _ := dfX.Shape()

@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"GoLab/base"
+	"GoLab"
 	"GoLab/dataframe"
 	"GoLab/dataframe/series"
 	"fmt"
@@ -22,7 +22,7 @@ type DecisionTreeRegressor struct {
 }
 
 // force implementation of Model interface
-var _ base.Model = (*DecisionTreeRegressor)(nil)
+var _ GoLab.Model = (*DecisionTreeRegressor)(nil)
 
 // NewDecisionTreeRegressor creates a new DecisionTreeRegressor with default values
 func NewDecisionTreeRegressor() *DecisionTreeRegressor {
